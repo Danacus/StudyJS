@@ -1,0 +1,88 @@
+@color0: #5BC0EB;
+@color1: #FDE74C;
+@color2: #9BC53D;
+@color3: #E55934;
+@color4: #FA7921;
+
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: top;
+    font-family: sans-serif;
+    //background-color: #414142 !important;
+}
+
+a {
+    text-decoration: none;
+}
+
+#document {
+  width: 100%;
+  min-height: 100px;
+  margin-top: 60px;
+  margin-right: 2%;
+}
+
+div[data-type='container'] {
+  margin-left: 2%;
+  margin-right: auto;
+}
+
+
+
+div[data-depth='0'] .panel-heading {
+  background-color: @color0;
+}
+
+div[data-depth='1'] .panel-heading {
+  background-color: @color1;
+}
+
+div[data-depth='2'] .panel-heading {
+  background-color: @color2;
+}
+
+div[data-depth='3'] .panel-heading {
+  background-color: @color3;
+}
+
+div[data-depth='4'] .panel-heading {
+  background-color: @color4;
+}
+
+div[data-depth='5'] .panel-heading {
+  background-color: #a5a5a5;
+}
+
+div[data-depth='0']>div:first-child::first-line {
+  font-size: 200%;
+  font-weight: bolder;
+}
+
+div[data-depth='1']>div:first-child::first-line {
+  font-size: 170%;
+  font-weight: bold;
+}
+
+div[data-depth='2']>div:first-child::first-line {
+  font-size: 150%;
+  font-weight: bold;
+}
+
+div[data-depth='3']>div:first-child::first-line {
+  font-size: 120%;
+  font-weight: bold;
+}
+
+div[data-depth='4']>div:first-child::first-line {
+  font-size: 100%;
+  font-weight: bold;
+}

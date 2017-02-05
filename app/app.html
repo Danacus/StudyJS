@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Electron Boilerplate</title>
+
+    <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
+
+    <script src="helpers/context_menu.js"></script>
+    <script src="helpers/external_links.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+</head>
+<body>
+  <script src="jquery-3.1.1.min.js"></script>
+  <script>
+    window.jQuery = window.$ = require('jquery');
+  </script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="keypress-2.1.4.min.js"></script>
+  <script src="app.js"></script>
+  <script src="viewer.js"></script>
+  <script src="tinymce.min.js"></script>
+  <script type="text/javascript">
+    function initTinyMCE() {
+      tinymce.init({
+        selector: 'div[data-type="editable"]',
+        inline: true,
+        theme: 'modern',
+        plugins: [
+          'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+          'searchreplace wordcount visualblocks visualchars code fullscreen',
+          'insertdatetime media nonbreaking table contextmenu directionality',
+          'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc'
+        ],
+        toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+        toolbar2: 'preview media | forecolor backcolor emoticons | codesample'
+      });
+    }
+  </script>
+
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <!--<a class="navbar-brand" href="#">WebSiteName</a>-->
+      </div>
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#" id="toggleEditor"><span class="glyphicon glyphicon-edit"></a></li>
+        <li><a href="#" id="save"><span class="glyphicon glyphicon-save-file"></span></a></li>
+        <li><a href="#" id="open"><span class="glyphicon glyphicon-open-file"></span></a></li>
+        <li><a href="#" id="new"><span class="glyphicon glyphicon-file"></span></a></li>
+        <li><a href="#" id="export"><span class="glyphicon glyphicon-export"></span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="document">
+    <!--<div data-type='container' data-depth='0'>
+      <div data-type='editable'>
+
+      </div>
+    </div>-->
+
+    <div data-type='container' data-depth='0'>
+      <div class="panel panel-default">
+        <div class="panel-heading" data-type='editable'></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
