@@ -1,0 +1,69 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  display: flex;
+  justify-content: center;
+  align-items: top;
+  font-family: sans-serif;
+}
+a {
+  text-decoration: none;
+}
+#document {
+  width: 100%;
+  min-height: 100px;
+  margin-top: 60px;
+  margin-right: 2%;
+}
+.nav > li > a:hover > span,
+.nav > li > a:focus > span,
+.nav > li > a > span {
+  color: #777777;
+}
+div[data-type='container'] {
+  margin-left: 2%;
+  margin-right: auto;
+}
+div[data-depth='0'] .panel-heading {
+  background-color: #5BC0EB;
+}
+div[data-depth='1'] .panel-heading {
+  background-color: #FDE74C;
+}
+div[data-depth='2'] .panel-heading {
+  background-color: #9BC53D;
+}
+div[data-depth='3'] .panel-heading {
+  background-color: #E55934;
+}
+div[data-depth='4'] .panel-heading {
+  background-color: #FA7921;
+}
+div[data-depth='5'] .panel-heading {
+  background-color: #a5a5a5;
+}
+div[data-depth='0'] > div:first-child::first-line {
+  font-size: 200%;
+  font-weight: bolder;
+}
+div[data-depth='1'] > div:first-child::first-line {
+  font-size: 170%;
+  font-weight: bold;
+}
+div[data-depth='2'] > div:first-child::first-line {
+  font-size: 150%;
+  font-weight: bold;
+}
+div[data-depth='3'] > div:first-child::first-line {
+  font-size: 120%;
+  font-weight: bold;
+}
+div[data-depth='4'] > div:first-child::first-line {
+  font-size: 100%;
+  font-weight: bold;
+}

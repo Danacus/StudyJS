@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Electron Boilerplate</title>
 
-    <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet" type="text/css">
 
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
@@ -12,14 +12,15 @@
 
 </head>
 <body>
-  <script src="jquery-3.1.1.min.js"></script>
+  <script src="js/jquery-3.1.1.min.js"></script>
   <script>
     window.jQuery = window.$ = require('jquery');
   </script>
   <script src="js/bootstrap.min.js"></script>
-  <script src="keypress-2.1.4.min.js"></script>
+  <script src="js/keypress-2.1.4.min.js"></script>
   <script src="app.js"></script>
-  <script src="viewer.js"></script>
+  <script src="js/viewer.js"></script>
+  <script src="js/globals.js"></script>
   <script src="tinymce.min.js"></script>
   <script type="text/javascript">
     function initTinyMCE() {
@@ -28,13 +29,22 @@
         inline: true,
         theme: 'modern',
         plugins: [
-          'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+          'advlist autolink lists link image charmap hr anchor',
           'searchreplace wordcount visualblocks visualchars code fullscreen',
           'insertdatetime media nonbreaking table contextmenu directionality',
           'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc'
         ],
-        toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-        toolbar2: 'preview media | forecolor backcolor emoticons | codesample'
+        toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor',
+        //toolbar2: 'forecolor backcolor',
+        menu: {/*
+          file: {title: 'File', items: 'newdocument'},
+          edit: {title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall'},
+          insert: {title: 'Insert', items: 'link media | template hr'},
+          view: {title: 'View', items: 'visualaid'},
+          format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
+          table: {title: 'Table', items: 'inserttable tableprops deletetable | cell row column'},
+          tools: {title: 'Tools', items: 'spellchecker code'}
+        */}
       });
     }
   </script>
@@ -55,12 +65,6 @@
   </nav>
 
   <div id="document">
-    <!--<div data-type='container' data-depth='0'>
-      <div data-type='editable'>
-
-      </div>
-    </div>-->
-
     <div data-type='container' data-depth='0'>
       <div class="panel panel-default">
         <div class="panel-heading" data-type='editable'></div>

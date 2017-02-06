@@ -17,6 +17,7 @@ function loadViewer() {
     });
 
     div.click(function() {
+      /*
       $(target).find("div[data-type='open']").toggle();
       $(target).children("div[data-type='container']").slideToggle("fast");
       $(target).find(".panel-body").slideToggle("fast");
@@ -37,9 +38,34 @@ function loadViewer() {
           complete: function () {},
           step: function () {}
         });
-      }
-    })
+      }*/
+      open($(target), $(this));
+    });
   });
+}
+
+function open(target, div) {
+  target.find("div[data-type='open']").toggle();
+  target.children("div[data-type='container']").slideToggle("fast");
+  target.find(".panel-body").slideToggle("fast");
+
+  if (div.data("open") == 'true') {
+    div.data("open", 'false');
+    div.animateRotate(90, {
+      duration: 100,
+      easing: 'linear',
+      complete: function () {},
+      step: function () {}
+    });
+  } else {
+    div.data("open", 'true');
+    div.animateRotate(0, {
+      duration: 100,
+      easing: 'linear',
+      complete: function () {},
+      step: function () {}
+    });
+  }
 }
 
 function getIndex(x, array) {

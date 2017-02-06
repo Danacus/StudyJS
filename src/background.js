@@ -7,7 +7,7 @@ import path from 'path';
 import url from 'url';
 import { app, Menu } from 'electron';
 import { devMenuTemplate } from './menu/dev_menu_template';
-import { editMenuTemplate } from './menu/edit_menu_template';
+import { editMenuTemplate, fileMenu } from './menu/edit_menu_template';
 import createWindow from './helpers/window';
 
 // Special module holding environment variables which you declared
@@ -17,7 +17,7 @@ import env from './env';
 var mainWindow;
 
 var setApplicationMenu = function () {
-    var menus = [editMenuTemplate];
+    var menus = [fileMenu, editMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }
