@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Electron Boilerplate</title>
+    <title>StudyJS</title>
 
     <link href="css/main.css" rel="stylesheet" type="text/css">
 
@@ -20,6 +20,7 @@
   <script src="js/keypress-2.1.4.min.js"></script>
   <script src="app.js"></script>
   <script src="js/viewer.js"></script>
+  <script src="js/style.js"></script>
   <script src="js/globals.js"></script>
   <script src="tinymce.min.js"></script>
   <script type="text/javascript">
@@ -34,17 +35,19 @@
           'insertdatetime media nonbreaking table contextmenu directionality',
           'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc'
         ],
-        toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor',
-        //toolbar2: 'forecolor backcolor',
-        menu: {/*
-          file: {title: 'File', items: 'newdocument'},
-          edit: {title: 'Edit', items: 'undo redo | cut copy paste pastetext | selectall'},
-          insert: {title: 'Insert', items: 'link media | template hr'},
-          view: {title: 'View', items: 'visualaid'},
-          format: {title: 'Format', items: 'bold italic underline strikethrough superscript subscript | formats | removeformat'},
-          table: {title: 'Table', items: 'inserttable tableprops deletetable | cell row column'},
-          tools: {title: 'Tools', items: 'spellchecker code'}
-        */}
+        toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor',
+        menu: {},
+        fixed_toolbar_container: '#toolbar',
+        height: 30,
+        textcolor_map: [
+          "50514F", "Dark Liver",
+          "F25F5C", "Sunset Orange",
+          "FFE066", "Mustard",
+          "247BA0", "Lapis Lazuli",
+          "70C1B3", "Green Sheen",
+        ],
+        textcolor_cols: "2",
+        textcolor_rows: "3"
       });
     }
   </script>
@@ -60,7 +63,24 @@
         <li><a href="#" id="open"><span class="glyphicon glyphicon-open-file"></span></a></li>
         <li><a href="#" id="new"><span class="glyphicon glyphicon-file"></span></a></li>
         <li><a href="#" id="export"><span class="glyphicon glyphicon-export"></span></a></li>
+        <!--<li><a href="#" id="colors"><span class="glyphicon glyphicon-tint"></span></a></li>-->
+        <li>
+          <div class="dropdown" style="margin-top: 3px">
+            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">Colors
+            <span class="caret"></span></button>
+            <ul class="dropdown-menu" id="col">
+              <!--<li class="dropdown-header" id="col">Colors</li>-->
+              <li><a href="#" id="colors"><span class="glyphicon glyphicon-plus"></span></a></li>
+            </ul>
+          </div>
+        </li>
+        <!--<li id="toolbar" class="pull-right"></li>-->
       </ul>
+      <div class="pull-right">
+        <ul class="nav navbar-nav">
+            <li id="toolbar"></li>
+        </ul>
+      </div>
     </div>
   </nav>
 

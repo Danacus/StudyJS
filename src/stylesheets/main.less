@@ -1,8 +1,15 @@
+
 @color0: #5BC0EB;
 @color1: #FDE74C;
 @color2: #9BC53D;
 @color3: #E55934;
 @color4: #FA7921;
+
+@green0: rgba(225, 226, 221, 1);
+@green1: rgba(163, 159, 147, 1);
+@green2: rgba(129, 166, 132, 1);
+@green3: rgba(87, 136, 108, 1);
+@green4: rgba(32, 64, 41, 1);
 
 
 html, body {
@@ -35,36 +42,39 @@ a {
     color: #777777;
 }
 
+.navbar-nav > li > a {padding-top:10px !important; padding-bottom:10px !important;}
+.navbar {min-height:29px !important}
+
 div[data-type='container'] {
   margin-left: 2%;
   margin-right: auto;
 }
 
 
-
+/*
 div[data-depth='0'] .panel-heading {
-  background-color: @color0;
+  background-color: @green0;
 }
 
 div[data-depth='1'] .panel-heading {
-  background-color: @color1;
+  background-color: @green1;
 }
 
 div[data-depth='2'] .panel-heading {
-  background-color: @color2;
+  background-color: @green2;
 }
 
 div[data-depth='3'] .panel-heading {
-  background-color: @color3;
+  background-color: @green3;
 }
 
 div[data-depth='4'] .panel-heading {
-  background-color: @color4;
+  background-color: @green4;
 }
 
 div[data-depth='5'] .panel-heading {
-  background-color: #a5a5a5;
-}
+  background-color: @green4;
+}*/
 
 div[data-depth='0']>div:first-child::first-line {
   font-size: 200%;

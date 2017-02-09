@@ -18,6 +18,7 @@ var appDir = jetpack.cwd(app.getAppPath());
 
 $(document).ready(function() {
   initTinyMCE();
+  appIO.loadColors();
   //loadViewer();
 });
 
@@ -89,5 +90,9 @@ $(document).ready(function () {
 
   $("#export").click(function() {
     appIO.exportFile();
+  });
+
+  $("#colors").click(function() {
+    appIO.addColor();
   });
 });

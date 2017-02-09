@@ -1,9 +1,12 @@
 import fs from 'fs';
 import { remote } from 'electron';
 import $ from 'jquery';
+import ncp from 'ncp';
+var appRoot = require('app-root-path');
 var dialog = remote.dialog;
 
 var template = '<!doctype html> <html> <head> <meta charset="utf-8"> <title>StudyJS</title> <link href="css/main.css" rel="stylesheet" type="text/css"> <link rel="stylesheet" href="css/bootstrap.min.css"> </head> <body> <script src="js/jquery-3.1.1.min.js"></script> <script> window.jQuery = window.$; $(document).ready(function() { loadViewer(); }); </script> <script src="js/bootstrap.min.js"></script> <script src="js/viewer.js"></script> <script src="js/globals.js"></script> <div id="document"> <!--replaceme--> </div> </body> </html>';
+
 
 var appIO = {
   saveFile : function () {
@@ -47,6 +50,7 @@ var appIO = {
               });
               initTinyMCE();
               loadViewer();
+              updateColors();
            });
          }
     });
@@ -71,6 +75,7 @@ var appIO = {
     document.title = globals.projectTitle + " - " + (globals.currentFile || "New File");
     initTinyMCE();
     loadViewer();
+    updateColors();
   },
   exportFile : function () {
     var newDoc = $('<div id="document2"></div>').appendTo($(document.body));
@@ -82,6 +87,7 @@ var appIO = {
     });
 
     var file = template.replace("<!--replaceme-->", newDoc.html());
+    file = file.replace("<!--colors-->", colors.toString());
     newDoc.remove();
 
     dialog.showOpenDialog({
@@ -97,16 +103,94 @@ var appIO = {
             var fileName = folderPaths[0].split("/")[folderPaths[0].split("/").length - 1];
             console.log(fileName);
 
-            fs.writeFile(folderPaths[0] + "/" + fileName, file,  function(err) {
+            fs.writeFile(folderPaths[0] + "/" + fileName + ".html", file,  function(err) {
                if (err) {
                   return console.error(err);
                }
                console.log("Data written successfully!");
+
+
+               console.log(appRoot);
+
+               ncp(appRoot + "/app/dist", folderPaths[0], function (err) {
+                 if (err) {
+                   return console.error(err);
+                 }
+                 console.log('done!');
+               });
             });
         }
     });
+  },
+  loadColors : function () {
+    loadCol();
+  },
+  addColor : function () {
+    dialog.showOpenDialog(function (fileNames) {
+         if(fileNames === undefined){
+              console.log("No file selected");
+         }else{
+           fs.readFile(fileNames[0], function (err, data) {
+              if (err) {
+                 return console.error(err);
+              }
+
+              console.log(fileNames[0] + " --> " + appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1]);
+
+              ncp(fileNames[0], appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1], function (err) {
+                if (err) {
+                  return console.error(err);
+                }
+                console.log('done!');
+                loadCol();
+              });
+           });
+         }
+    });
   }
 };
+
+function loadCol() {
+  colors = [];
+
+
+  readFiles(appRoot + "/app/colors/", function (fileName, content) {
+    colors.push({
+      name: fileName.replace(".json", ""),
+      col: JSON.parse(content).colors
+    });
+
+    $(".color-item").remove();
+
+    for (var i = 0; i < colors.length; i++) {
+      var li = $("<li class='color-item' data-index="+ i +"><a href='#'>"+ colors[i].name +"</a></li>").prependTo("#col");
+      li.children(":first").click(function () {
+        setColors(colors[$(this).parent().data("index")].col);
+        updateColors();
+      });
+    }
+  }, function (err) {
+    console.error(err);
+  });
+}
+
+function readFiles(dirname, onFileContent, onError) {
+  fs.readdir(dirname, function(err, filenames) {
+    if (err) {
+      onError(err);
+      return;
+    }
+    filenames.forEach(function(filename) {
+      fs.readFile(dirname + filename, 'utf-8', function(err, content) {
+        if (err) {
+          onError(err);
+          return;
+        }
+        onFileContent(filename, content);
+      });
+    });
+  });
+}
 
 function write() {
   tinymce.remove('div[data-type="editable"]');
@@ -120,6 +204,7 @@ function write() {
      globals.saved = true;
   });
   initTinyMCE();
+  updateColors();
 }
 
 export {appIO};
