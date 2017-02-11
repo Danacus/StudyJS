@@ -33,8 +33,11 @@ a {
   min-height: 29px !important;
 }
 div[data-type='container'] {
-  margin-left: 2%;
+  margin-left: 20px;
   margin-right: auto;
+}
+div[data-type='container'] > * {
+  margin-top: -15px;
 }
 /*
 div[data-depth='0'] .panel-heading {
@@ -60,23 +63,26 @@ div[data-depth='4'] .panel-heading {
 div[data-depth='5'] .panel-heading {
   background-color: @green4;
 }*/
-div[data-depth='0'] > div:first-child::first-line {
-  font-size: 200%;
+div[data-depth='0'] > div.panel > div.panel-heading > p:first-child {
+  font-size: 150%;
   font-weight: bolder;
 }
-div[data-depth='1'] > div:first-child::first-line {
-  font-size: 170%;
+div[data-depth='1'] > div.panel > div.panel-heading > p:first-child {
+  font-size: 130%;
   font-weight: bold;
 }
-div[data-depth='2'] > div:first-child::first-line {
-  font-size: 150%;
+div[data-depth='2'] > div.panel > div.panel-heading > p:first-child {
+  font-size: 110%;
   font-weight: bold;
 }
-div[data-depth='3'] > div:first-child::first-line {
-  font-size: 120%;
+div[data-depth='3'] > div.panel > div.panel-heading > p:first-child {
+  font-size: 90%;
   font-weight: bold;
 }
-div[data-depth='4'] > div:first-child::first-line {
-  font-size: 100%;
+div[data-depth='4'] > div.panel > div.panel-heading > p:first-child {
+  font-size: 70%;
   font-weight: bold;
+}
+ul {
+  margin-left: -25px;
 }

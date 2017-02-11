@@ -1,27 +1,40 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>StudyJS</title>
     <link href="css/main.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/mathquill.css">
 </head>
+
 <body>
-  <script src="js/jquery-3.1.1.min.js"></script>
-  <script>
-    window.jQuery = window.$;
-    $(document).ready(function() {
-      loadViewer();
-    });
-  </script>
-  <!--colors-->
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/viewer.js"></script>
-  <script src="js/globals.js"></script>
-  <div id="document">
-    <!--replaceme-->
-  </div>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script>
+        window.jQuery = window.$;
+        $(document).ready(function() {
+            loadViewer();
+            $(".mathquill-rendered-math").children().not(".selectable").remove();
+            var rem = $(".mathquill-rendered-math").contents().filter(function() {
+                return (this.nodeType === 3);
+            });
+            rem.remove();
+        });
+    </script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"], ["\\(","\\)"]] }, CommonHTML: { scale: 80 } });
+    </script>
+    <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+    </script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/viewer.js"></script>
+    <script src="js/globals.js"></script>
+    <div id="document">
+        <!--replaceme-->
+    </div>
 
 </body>
+
 </html>

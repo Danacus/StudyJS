@@ -3,13 +3,23 @@
 
 // Use new ES6 modules syntax for everything.
 import os from 'os'; // native node.js module
-import { remote } from 'electron'; // native electron module
+import {
+	remote
+} from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { greet } from './hello_world/hello_world'; // code authored by you in this project
+import {
+	greet
+} from './hello_world/hello_world'; // code authored by you in this project
 import env from './env';
 import $ from 'jquery';
-import { editor } from './editor';
-import { appIO } from './io';
+import {
+	editor
+} from './editor';
+import {
+	appIO
+} from './io';
+import fs from 'fs';
+
 
 console.log('Loaded environment variables:', env);
 
@@ -17,82 +27,86 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 
 $(document).ready(function() {
-  initTinyMCE();
-  appIO.loadColors();
-  //loadViewer();
+	appIO.load();
+	initTinyMCE();
+	//loadViewer();
 });
 
-$(document).keypress(function(){
-    globals.saved = false;
-    document.title = globals.title + " - " + (globals.currentFile || "New File") + "*";
+$(document).keypress(function() {
+	globals.saved = false;
+	document.title = globals.title + " - " + (globals.currentFile || "New File") + "*";
 });
 
 var listener = new window.keypress.Listener();
 
 listener.simple_combo("ctrl down", function() {
-    editor.addContainer(editor.add.after);
+	editor.addContainer(editor.add.after);
 });
 
 listener.simple_combo("cmd down", function() {
-    editor.addContainer(editor.add.after);
+	editor.addContainer(editor.add.after);
 });
 
 listener.simple_combo("ctrl up", function() {
-    editor.addContainer(editor.add.before);
+	editor.addContainer(editor.add.before);
 });
 
 listener.simple_combo("cmd up", function() {
-    editor.addContainer(editor.add.before);
+	editor.addContainer(editor.add.before);
 });
 
 listener.simple_combo("ctrl right", function() {
-    editor.addContainer(editor.add.child);
+	editor.addContainer(editor.add.child);
 });
 
 listener.simple_combo("cmd right", function() {
-    editor.addContainer(editor.add.child);
+	editor.addContainer(editor.add.child);
 });
 
 listener.simple_combo("alt down", function() {
-    console.log("add body");
-    editor.addBody();
+	console.log("add body");
+	editor.addBody();
 });
 
 //IPC recievers
 require('electron').ipcRenderer.on('save', function(event, message) {
-  appIO.saveFile();
+	appIO.saveFile();
 });
 
 require('electron').ipcRenderer.on('open', function(event, message) {
-  appIO.openFile();
+	appIO.openFile();
 });
 
 require('electron').ipcRenderer.on('new', function(event, message) {
-  appIO.newFile();
+	appIO.newFile();
 });
 
 require('electron').ipcRenderer.on('export', function(event, message) {
-  appIO.exportFile();
+	appIO.exportFile();
 });
 
-$(document).ready(function () {
-  $("#save").click(function() {
-    appIO.saveFile();
-  });
+$(document).ready(function() {
+	$("#save").click(function() {
+		appIO.saveFile();
+	});
 
-  $("#open").click(function() {
-    appIO.openFile();
-  });
+	$("#open").click(function() {
+		appIO.openFile();
+	});
 
-  $("#new").click(function() {
-    appIO.newFile();
-  });
+	$("#new").click(function() {
+		appIO.newFile();
+	});
 
-  $("#export").click(function() {
-    appIO.exportFile();
-  });
+	$("#export").click(function() {
+		appIO.exportFile();
+	});
 
-  $("#colors").click(function() {
-    appIO.addColor();
-  });
+	$("#colors").click(function() {
+		appIO.addColor();
+	});
+
+	$("#styles").click(function() {
+		appIO.addStyle();
+	});
 });
