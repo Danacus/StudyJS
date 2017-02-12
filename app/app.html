@@ -10,6 +10,7 @@
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/mathquill.css" />
 
 </head>
 
@@ -18,7 +19,10 @@
     <script>
         window.jQuery = window.$ = require('jquery');
     </script>
-    <script src="js/mathquill.min.js"></script>
+    <script src="js/mathquill.js"></script>
+    <script>
+        var MQ = MathQuill.getInterface(2);
+    </script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/keypress-2.1.4.min.js"></script>
     <script src="app.js"></script>
@@ -27,6 +31,11 @@
     <script src="js/globals.js"></script>
     <script src="js/util.js"></script>
     <script src="tinymce.min.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"], ["\\(","\\)"]] }, CommonHTML: { scale: 80 } });
+    </script>
+    <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+    </script>
     <script type="text/javascript">
         function initTinyMCE() {
             //tinymce.PluginManager.load('equationeditor', '../plugins/equationeditor/plugin.min.js');
@@ -50,10 +59,10 @@
                     'advlist autolink lists link image charmap hr anchor',
                     'searchreplace wordcount visualblocks visualchars code fullscreen',
                     'insertdatetime media nonbreaking table contextmenu directionality',
-                    'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc equationeditor'
+                    'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc'
                 ],
-                content_css: 'plugins/equationeditor/mathquill.css',
-                toolbar1: 'undo redo | image | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor | equationeditor',
+                //content_css: 'plugins/equationeditor/mathquill.css',
+                toolbar1: 'undo redo | image | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor',
                 menu: {},
                 fixed_toolbar_container: '#toolbar',
                 height: 30,
@@ -81,6 +90,7 @@
                 <li><a href="#" id="open"><span class="glyphicon glyphicon-open-file"></span></a></li>
                 <li><a href="#" id="new"><span class="glyphicon glyphicon-file"></span></a></li>
                 <li><a href="#" id="export"><span class="glyphicon glyphicon-export"></span></a></li>
+                <li><a href="#" id="eqedit" data-toggle="modal" data-target="#eq-editor">f(x)</a></li>
                 <!--<li><a href="#" id="colors"><span class="glyphicon glyphicon-tint"></span></a></li>-->
                 <li>
                     <div class="dropdown" style="margin-top: 3px">
@@ -118,10 +128,36 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Notification</h4>
+                    <h4 class="modal-title">Success!</h4>
                 </div>
                 <div class="modal-body">
                     <p>File Export Successful!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="eq-editor" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Equation Editor</h4>
+                </div>
+                <div class="modal-body">
+                    <p><span id="eq-field"></span></p>
+                    <p><span id="eq-latex"></span></p>
+
+                    <div id="eq-menu">
+                        <div class="panel list-group" id="eq-panel">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="eq-insert" type="button" class="btn btn-primary">Insert</button>
+                    <button id="eq-close" type="button" class="btn btn-default">Close</button>
                 </div>
             </div>
         </div>

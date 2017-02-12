@@ -16,15 +16,16 @@
         window.jQuery = window.$;
         $(document).ready(function() {
             loadViewer();
+            /*
             $(".mathquill-rendered-math").children().not(".selectable").remove();
             var rem = $(".mathquill-rendered-math").contents().filter(function() {
                 return (this.nodeType === 3);
             });
-            rem.remove();
+            rem.remove();*/
         });
     </script>
     <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"], ["\\(","\\)"]] }, CommonHTML: { scale: 80 } });
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 80 } });
     </script>
     <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
     </script>

@@ -10,7 +10,7 @@ var dialog = remote.dialog;
 var mkdirp = require('mkdirp');
 var request = require('request');
 
-var template = '<!doctype html> <html> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> <title>StudyJS</title> <link href="css/main.css" rel="stylesheet" type="text/css"> <link rel="stylesheet" href="css/bootstrap.min.css"> <link rel="stylesheet" href="css/mathquill.css"> </head> <body> <script src="js/jquery-3.1.1.min.js"></script> <script> window.jQuery = window.$; $(document).ready(function() { loadViewer(); $(".mathquill-rendered-math").children().not(".selectable").remove(); var rem = $(".mathquill-rendered-math").contents().filter(function() { return (this.nodeType === 3); }); rem.remove(); }); </script> <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"], ["\\(","\\)"]] }, CommonHTML: { scale: 100 } }); </script> <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML"> </script> <script src="js/bootstrap.min.js"></script> <script src="js/viewer.js"></script> <script src="js/globals.js"></script> <div id="document"> <!--replaceme--> </div> </body> </html>  ';
+var template = '<!doctype html> <html> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> <title>StudyJS</title> <link href="css/main.css" rel="stylesheet" type="text/css"> <link rel="stylesheet" href="css/bootstrap.min.css"> <link rel="stylesheet" href="css/mathquill.css"> </head> <body> <script src="js/jquery-3.1.1.min.js"></script> <script> window.jQuery = window.$; $(document).ready(function() { loadViewer(); /* $(".mathquill-rendered-math").children().not(".selectable").remove(); var rem = $(".mathquill-rendered-math").contents().filter(function() { return (this.nodeType === 3); }); rem.remove();*/ }); </script> <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 80 } }); </script> <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML"> </script> <script src="js/bootstrap.min.js"></script> <script src="js/viewer.js"></script> <script src="js/globals.js"></script> <div id="document"> <!--replaceme--> </div> </body> </html>';
 
 var appRoot = getHomePath() + "/StudyJS";
 
@@ -102,6 +102,7 @@ var appIO = {
 					$("div[data-type='open']").each(function() {
 						$(this).remove();
 					});
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 					updateColors();
 				});
 			}
@@ -131,6 +132,9 @@ var appIO = {
 	},
 	exportFile: function() {
 		var newDoc = $('<div id="document2"></div>').appendTo($(document.body));
+		$(".eq-math").each(function functionName() {
+			$(this).html($(this).data("formula"));
+		});
 		newDoc.html($("#document").html());
 
 		newDoc.find('*').each(function() {
@@ -158,6 +162,8 @@ var appIO = {
 				//var fileName = folderPaths[0].split("/")[folderPaths[0].split("/").length - 1];
 				//console.log(fileName);
 
+
+
 				fs.writeFile(folderPaths, file, function(err) {
 					if (err) {
 						return console.error(err);
@@ -170,6 +176,7 @@ var appIO = {
 						}
 						console.log('done!');
 						$("#modal").modal("show");
+						MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
 						window.setTimeout(function() {
 							$("#modal").modal("hide");
@@ -324,11 +331,14 @@ function readFiles(dirname, onFileContent, onError) {
 
 function write() {
 	tinymce.remove('div[data-type="editable"]');
+	$(".eq-math").each(function functionName() {
+		$(this).html($(this).data("formula"));
+	});
 	fs.writeFile(globals.currentFile, $("#document")[0].innerHTML, function(err) {
 		if (err) {
 			return console.error(err);
 		}
-
+		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 		console.log("Data written successfully!");
 		document.title = globals.title + " - " + globals.currentFile;
 		globals.saved = true;

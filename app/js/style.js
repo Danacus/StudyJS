@@ -42,7 +42,9 @@ function updateStyle() {
 		for (var j = 0; j < styleFile.items.length; j++) {
 			for (var i = 0; i < styleFile.items[j].name.length; i++) {
 				$("." + styleFile.items[j].name[i]).css(styleFile.items[j].style);
-				$("." + styleFile.items[j].name[i]).parents(".panel-body, .panel-heading").first().css(styleFile.items[j].panel.style);
+				$("." + styleFile.items[j].name[i]).each(function() {
+					$(this).parents(".panel-body, .panel-heading").first().css(styleFile.items[j].panel.style);
+				});
 			}
 		}
 	}

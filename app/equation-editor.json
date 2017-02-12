@@ -1,0 +1,29 @@
+[{
+	"label": "Greek Letters",
+	"latex": [
+		[
+			"\\alpha",
+			"\\beta",
+			"\\gamma",
+			"\\delta",
+			"\\epsilon",
+			"\\zeta",
+			"\\eta",
+			"\\theta",
+			"\\lambda",
+			"\\mu",
+		],
+		[
+			"\\Alpha",
+			"\\Beta",
+			"\\Gamma",
+			"\\Delta",
+			"\\Epsilon",
+			"\\Zeta",
+			"\\Eta",
+			"\\Theta",
+			"\\Lambda",
+			"\\Mu",
+		]
+	]
+}]

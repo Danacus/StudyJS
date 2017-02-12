@@ -19,7 +19,9 @@ import {
 	appIO
 } from './io';
 import fs from 'fs';
-
+import {
+	MQEdit
+} from './eqEditor';
 
 console.log('Loaded environment variables:', env);
 
@@ -27,6 +29,7 @@ var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 
 $(document).ready(function() {
+	MQEdit.load();
 	appIO.load();
 	initTinyMCE();
 	//loadViewer();
@@ -108,5 +111,17 @@ $(document).ready(function() {
 
 	$("#styles").click(function() {
 		appIO.addStyle();
+	});
+
+	$("#eqedit").click(function() {
+		MQEdit.open();
+	});
+
+	$("#eq-insert").click(function() {
+		MQEdit.insert();
+	});
+
+	$("#eq-close").click(function() {
+		MQEdit.close();
 	});
 });
