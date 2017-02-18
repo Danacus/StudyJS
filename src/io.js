@@ -4,8 +4,15 @@ import {
 } from 'electron';
 import $ from 'jquery';
 import ncp from 'ncp';
+import {
+	serializer
+} from './serialize';
 
-var getHomePath = require('home-path')
+import {
+	driveIO
+} from './driveIO';
+
+var getHomePath = require('home-path');
 var dialog = remote.dialog;
 var mkdirp = require('mkdirp');
 var request = require('request');
@@ -15,7 +22,7 @@ var template = '<!doctype html> <html> <head> <meta charset="utf-8"> <meta name=
 var appRoot = getHomePath() + "/StudyJS";
 
 var appIO = {
-	load: function() {
+	load: new Promise(function(resolve, reject) {
 		/*
 		mkdirp(appRoot + "/app/colors/");
 		mkdirp(appRoot + "/app/style/");
@@ -39,19 +46,26 @@ var appIO = {
 					console.log("success!");
 					loadCol();
 					loadSty();
+					resolve();
 				}, function() {
 					console.log("error!");
+					bootstrapNotification({
+						type: "alert-danger",
+						content: "Cannot download assets!"
+					});
+					reject();
 				});
 
 			});
-	},
+	}),
 	saveFile: function() {
+		//var current = $(".mce-edit-focus")[0];
 		if (globals.currentFile == null) {
 			dialog.showSaveDialog({
 				title: "Save File",
 				filters: [{
-					name: 'StudyJS XML Files',
-					extensions: ['xml']
+					name: 'StudyJS JSON Files',
+					extensions: ['json']
 				}]
 			}, function(fileName) {
 				if (fileName === undefined) {
@@ -60,52 +74,63 @@ var appIO = {
 				globals.currentFile = fileName;
 				write();
 			});
-		} else {
+		} else
+		if (globals.currentFile.endsWith(".json")) {
 			write();
+		} else {
+			tinymce.remove('div[data-type="editable"]');
+			$(".eq-math").each(function functionName() {
+				$(this).html($(this).data("formula"));
+			});
+			console.log(globals.currentFile.split(/[()]/)[1]);
+			driveIO.writeFile(globals.currentFile.split(/[()]/)[1], serializer.serialize());
+			initTinyMCE();
+			updateColors();
 		}
+		//tinymce.get($(current).attr("id")).focus();
+	},
+	saveAs: function() {
+		dialog.showSaveDialog({
+			title: "Save File",
+			filters: [{
+				name: 'StudyJS JSON Files',
+				extensions: ['json']
+			}]
+		}, function(fileName) {
+			if (fileName === undefined) {
+				return;
+			}
+			globals.currentFile = fileName;
+			write();
+		});
 	},
 	openFile: function() {
-		var r = true;
-		if (!globals.saved)
-			r = confirm("Close without saving?");
+		open();
+	},
+	openDriveFile: function(id, name) {
+		driveIO.openFile(id, function(data) {
+			var r = true;
+			if (!globals.saved)
+				r = confirm("Close without saving?");
 
-		if (r == true) {
-			$("#document").html("");
-		} else {
-			return;
-		}
-
-		dialog.showOpenDialog({
-			title: "Open File",
-			filters: [{
-				name: 'StudyJS XML Files',
-				extensions: ['xml']
-			}]
-		}, function(fileNames) {
-			if (fileNames === undefined) {
-				console.log("No file selected");
+			if (r == true) {
+				$("#document").html("");
 			} else {
-				fs.readFile(fileNames[0], function(err, data) {
-					if (err) {
-						return console.error(err);
-					}
-					globals.currentFile = fileNames[0];
-					document.title = globals.projectTitle + " - " + globals.currentFile;
-					$("#document").html(data.toString());
-					$("#document").find('*').each(function() {
-						$(this).removeAttr("id spellcheck contenteditable");
-						$(this).removeClass("mce-content-body mce-edit-focus");
-					});
-
-					initTinyMCE();
-					loadViewer();
-					$("div[data-type='open']").each(function() {
-						$(this).remove();
-					});
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-					updateColors();
-				});
+				return;
 			}
+
+			globals.currentFile = name + " (" + id + ")";
+			document.title = globals.projectTitle + " - " + globals.currentFile;
+
+			serializer.deserialize(JSON.parse(data));
+
+			initTinyMCE();
+			loadViewer();
+			$("div[data-type='open']").each(function() {
+				$(this).remove();
+			});
+			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+			updateColors();
 		});
 	},
 	newFile: function() {
@@ -159,10 +184,6 @@ var appIO = {
 				return;
 			} else {
 				console.log(folderPaths);
-				//var fileName = folderPaths[0].split("/")[folderPaths[0].split("/").length - 1];
-				//console.log(fileName);
-
-
 
 				fs.writeFile(folderPaths, file, function(err) {
 					if (err) {
@@ -334,7 +355,7 @@ function write() {
 	$(".eq-math").each(function functionName() {
 		$(this).html($(this).data("formula"));
 	});
-	fs.writeFile(globals.currentFile, $("#document")[0].innerHTML, function(err) {
+	fs.writeFile(globals.currentFile, serializer.serialize(), function(err) {
 		if (err) {
 			return console.error(err);
 		}
@@ -345,6 +366,56 @@ function write() {
 	});
 	initTinyMCE();
 	updateColors();
+}
+
+function open() {
+	var r = true;
+	if (!globals.saved)
+		r = confirm("Close without saving?");
+
+	if (r == true) {
+		$("#document").html("");
+	} else {
+		return;
+	}
+
+	dialog.showOpenDialog({
+		title: "Open File",
+		filters: [{
+			name: 'StudyJS XML Files',
+			extensions: ['xml', 'json']
+		}]
+	}, function(fileNames) {
+		if (fileNames === undefined) {
+			console.log("No file selected");
+		} else {
+			fs.readFile(fileNames[0], function(err, data) {
+				if (err) {
+					return console.error(err);
+				}
+				globals.currentFile = fileNames[0];
+				document.title = globals.projectTitle + " - " + globals.currentFile;
+
+				if (fileNames[0].includes(".json")) {
+					serializer.deserialize(JSON.parse(data));
+				} else {
+					$("#document").html(data.toString());
+					$("#document").find('*').each(function() {
+						$(this).removeAttr("id spellcheck contenteditable");
+						$(this).removeClass("mce-content-body mce-edit-focus");
+					});
+				}
+
+				initTinyMCE();
+				loadViewer();
+				$("div[data-type='open']").each(function() {
+					$(this).remove();
+				});
+				MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+				updateColors();
+			});
+		}
+	});
 }
 
 export {

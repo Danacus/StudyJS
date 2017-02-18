@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>StudyJS</title>
+    <title>StudyJS - New File</title>
 
     <link href="css/main.css" rel="stylesheet" type="text/css">
 
@@ -30,16 +30,17 @@
     <script src="js/style.js"></script>
     <script src="js/globals.js"></script>
     <script src="js/util.js"></script>
+    <!--<script src="js/driveIO.js"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>-->
     <script src="tinymce.min.js"></script>
     <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"], ["\\(","\\)"]] }, CommonHTML: { scale: 80 } });
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 80 } });
     </script>
     <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
     </script>
     <script type="text/javascript">
         function initTinyMCE() {
-            //tinymce.PluginManager.load('equationeditor', '../plugins/equationeditor/plugin.min.js');
-
             var c = [];
 
             if (array != null) {
@@ -48,8 +49,6 @@
                     c.push("");
                 }
             }
-
-
 
             tinymce.init({
                 selector: 'div[data-type="editable"]',
@@ -61,18 +60,10 @@
                     'insertdatetime media nonbreaking table contextmenu directionality',
                     'emoticons template paste textcolor colorpicker textpattern imagetools codesample toc'
                 ],
-                //content_css: 'plugins/equationeditor/mathquill.css',
                 toolbar1: 'undo redo | image | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor',
                 menu: {},
                 fixed_toolbar_container: '#toolbar',
                 height: 30,
-                /*textcolor_map: [
-                    "50514F", "Dark Liver",
-                    "F25F5C", "Sunset Orange",
-                    "FFE066", "Mustard",
-                    "247BA0", "Lapis Lazuli",
-                    "70C1B3", "Green Sheen",
-                ],*/
                 textcolor_map: c,
                 textcolor_cols: "2",
                 textcolor_rows: "3"
@@ -102,16 +93,16 @@
                         </ul>
                     </div>
                 </li>
+                <!--
                 <li style="margin-left: 10px">
                     <div class="dropdown" style="margin-top: 3px">
                         <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">Styles
                           <span class="caret"></span></button>
                         <ul class="dropdown-menu" id="sty">
-                            <!--<li class="dropdown-header" id="col">Colors</li>-->
                             <li><a href="#" id="styles"><span class="glyphicon glyphicon-plus"></span></a></li>
                         </ul>
                     </div>
-                </li>
+                </li>-->
                 <!--<li id="toolbar" class="pull-right"></li>-->
             </ul>
             <div class="pull-right">
@@ -132,6 +123,38 @@
                 </div>
                 <div class="modal-body">
                     <p>File Export Successful!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="drive" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="drive-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Open Remote File</h4>
+                </div>
+                <div class="modal-body" id="drive-body">
+                    <ul class="list-group" id="drive-list">
+                        <li class="list-group-item">First item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="save" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="drive-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Save File</h4>
+                </div>
+                <div class="modal-body" id="drive-body">
+                    <ul class="list-group" id="drive-list">
+                        <li class="list-group-item">First item</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -163,6 +186,33 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div id="dialog" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                    <p></p>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container" style="z-index: 3; position: absolute; overflow:hidden; margin-top: -50px">
+        <div id="notification" class="alert alert-info">
+
+        </div>
+    </div>
+
     <div id="document">
         <div data-type='container' data-depth='0'>
             <div class="panel panel-default">
@@ -170,6 +220,5 @@
             </div>
         </div>
     </div>
-</body>
 
 </html>

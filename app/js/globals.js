@@ -1,5 +1,6 @@
 var globals = {
-  currentFile: null,
-  saved: true,
-  title: "StudyJS"
+	currentFile: null,
+	saved: true,
+	title: "StudyJS",
+	authorized: false
 }

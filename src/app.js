@@ -4,7 +4,8 @@
 // Use new ES6 modules syntax for everything.
 import os from 'os'; // native node.js module
 import {
-	remote
+	remote,
+	ipcRenderer
 } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
 import {
@@ -16,23 +17,40 @@ import {
 	editor
 } from './editor';
 import {
-	appIO
-} from './io';
+	AppIO
+} from './io3';
 import fs from 'fs';
 import {
 	MQEdit
 } from './eqEditor';
+import {
+	serializer
+} from './serialize';
+import {
+	driveIO
+} from './driveIO';
+import {
+	loadSettings,
+	saveSettings,
+	settings
+} from './settings';
 
 console.log('Loaded environment variables:', env);
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
+var appIO;
 
 $(document).ready(function() {
+	/*
+			if (settings.token) {
+				driveIO.authorize(settings.token, function() {
+
+				});
+			}*/
+	appIO = new AppIO();
 	MQEdit.load();
-	appIO.load();
 	initTinyMCE();
-	//loadViewer();
 });
 
 $(document).keypress(function() {
@@ -72,29 +90,49 @@ listener.simple_combo("alt down", function() {
 });
 
 //IPC recievers
-require('electron').ipcRenderer.on('save', function(event, message) {
-	appIO.saveFile();
+ipcRenderer.on('save', function(event, message) {
+	var drive = true;
+
+	if ((globals.currentFile || ".json").endsWith(".json")) {
+		drive = false;
+	}
+
+	appIO.save(globals.currentFile, drive);
 });
 
-require('electron').ipcRenderer.on('open', function(event, message) {
-	appIO.openFile();
+ipcRenderer.on('saveas', function(event, message) {
+	appIO.save();
 });
 
-require('electron').ipcRenderer.on('new', function(event, message) {
+ipcRenderer.on('open', function(event, message) {
+	appIO.open();
+});
+
+ipcRenderer.on('new', function(event, message) {
 	appIO.newFile();
 });
 
-require('electron').ipcRenderer.on('export', function(event, message) {
+ipcRenderer.on('export', function(event, message) {
 	appIO.exportFile();
+});
+
+ipcRenderer.on('logout', function(event, message) {
+	globals.authorized = false;
 });
 
 $(document).ready(function() {
 	$("#save").click(function() {
-		appIO.saveFile();
+		var drive = true;
+
+		if ((globals.currentFile || ".json").endsWith(".json")) {
+			drive = false;
+		}
+
+		appIO.save(globals.currentFile, drive);
 	});
 
 	$("#open").click(function() {
-		appIO.openFile();
+		appIO.open();
 	});
 
 	$("#new").click(function() {
@@ -109,9 +147,9 @@ $(document).ready(function() {
 		appIO.addColor();
 	});
 
-	$("#styles").click(function() {
+	/*$("#styles").click(function() {
 		appIO.addStyle();
-	});
+	});*/
 
 	$("#eqedit").click(function() {
 		MQEdit.open();

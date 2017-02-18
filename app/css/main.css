@@ -86,3 +86,8 @@ div[data-depth='4'] > div.panel > div.panel-heading > p:first-child {
 ul {
   margin-left: -25px;
 }
+#drive-list {
+  margin-left: 0px;
+  overflow-y: auto;
+  max-height: 600px !important;
+}
