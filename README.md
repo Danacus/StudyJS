@@ -11,7 +11,7 @@ Installing
 -------------
 
 `git clone https://github.com/Danacus/StudyJS.git`  
-`cd StudyJS-master`  
+`cd StudyJS`  
 `npm install`  
 `npm start`  
 
