@@ -71,7 +71,7 @@ class bootstrapNotification {
 				complete: () => {
 					this.c.remove();
 				}
-			}), 2500);
+			}), 3000);
 	}
 }
 

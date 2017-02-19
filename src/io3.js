@@ -25,12 +25,8 @@ var getHomePath = require("home-path");
 import {
 	mkdirp
 } from 'mkdirp';
-import {
-	request
-} from 'request';
-import {
-	Zip
-} from 'machinepack-zip';
+var request = require('request');
+var Zip = require('machinepack-zip');
 import {
 	loadSettings,
 	saveSettings,
@@ -477,19 +473,27 @@ function _open(success) {
 }
 
 function _downloadAssets(callback) {
-	request('https://drive.google.com/uc?export=download&id=0B9SOgaQjC78hYWVZMG03ZFRkTzA')
+	if (!fs.existsSync(appRoot)) {
+		fs.mkdirSync(appRoot);
+	}
+
+	request('https://github.com/Danacus/StudyJS/raw/master/app/dist/assets.zip')
 		.pipe(fs.createWriteStream(appRoot + '/assets.zip'))
 		.on('close', function() {
 			Zip.unzip({
 				source: appRoot + '/assets.zip',
 				destination: appRoot,
-			}).exec(function() {
-				callback();
-			}, function() {
-				new bootstrapNotification({
-					type: "alert-danger",
-					content: "Failed to download assets"
-				})
+			}).exec({
+				success: function() {
+					callback();
+				},
+
+				error: function(err) {
+					new bootstrapNotification({
+						type: "alert-danger",
+						content: "Failed to download assets: " + err
+					})
+				}
 			});
 		});
 }

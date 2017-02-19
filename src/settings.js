@@ -17,7 +17,7 @@ var loadSettings = function(callback) {
 		settings = JSON.parse(data);
 		callback();
 	}).catch(function(err) {
-		bootstrapNotification({
+		new bootstrapNotification({
 			type: "alert-danger",
 			content: "Cannot load settings! " + err
 		});
@@ -28,7 +28,7 @@ var saveSettings = function(callback) {
 	writeFile(appRoot + "/settings.json", JSON.stringify(settings)).then(function(data) {
 		callback();
 	}).catch(function(err) {
-		bootstrapNotification({
+		new bootstrapNotification({
 			type: "alert-danger",
 			content: "Cannot save settings! " + err
 		});

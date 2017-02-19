@@ -75,8 +75,8 @@ function getFolder(auth, callback) {
 	}, function(err, response) {
 		if (err) {
 			new bootstrapNotification({
-				type: "alert-danger",
-				content: "The API returned an error: " + err
+				type: "alert-warning",
+				content: "Cannot authorize Google Drive! Token might be expired!"
 			});
 			return;
 		}
