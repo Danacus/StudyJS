@@ -1,7 +1,7 @@
 var json = [];
 
-var serializer = {
-	serialize: function() {
+class serializer {
+	static serialize() {
 		json = [];
 
 		$(".eq-math").each(function functionName() {
@@ -15,8 +15,8 @@ var serializer = {
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
 		return JSON.stringify(json);
-	},
-	deserialize: function(obj) {
+	}
+	static deserialize(obj) {
 		for (var i = 0; i < obj.length; i++) {
 			$("#document").deserialize(obj[i]);
 		}

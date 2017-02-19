@@ -1,8 +1,3 @@
-// This is main process of Electron, started as first thing when your
-// app starts. This script is running through entire life of your application.
-// It doesn't have any windows which you can see on screen, but we can open
-// window from here.
-
 import path from 'path';
 import url from 'url';
 import {
@@ -20,10 +15,6 @@ import {
 } from './menu/edit_menu_template';
 import createWindow from './helpers/window';
 const electronOauth2 = require('electron-oauth2');
-
-
-// Special module holding environment variables which you declared
-// in config/env_xxx.json file.
 import env from './env';
 
 var mainWindow;

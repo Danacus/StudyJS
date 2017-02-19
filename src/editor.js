@@ -1,6 +1,13 @@
 import $ from 'jquery';
 
-var container = "<div data-type='container' data-depth='0'><div class='panel panel-default'><div class='panel-heading' data-type='editable'></div></div></div>";
+var container = `
+	<div data-type='container' data-depth='0'>
+		<div class='panel panel-default'>
+			<div class='panel-heading' data-type='editable'>
+			</div>
+		</div>
+	</div>
+`;
 
 class Editor {
 	constructor() {
@@ -29,6 +36,9 @@ class Editor {
 			case 4:
 				div = $(container).insertAfter(parent);
 				div.append(parent);
+				$("div[data-type='container']").each(function() {
+					$(this).attr("data-depth", $(this).parents("div[data-type='container']").length);
+				});
 				break;
 			default:
 				return;
@@ -48,8 +58,8 @@ class Editor {
 			"min-height": "50px"
 		}, 100, function() {
 			initTinyMCE();
-			//loadViewer();
-			tinymce.get( /*parseInt(div.attr("id").replace("mce_", "") - 1)*/ div.attr("id")).focus();
+			loadViewer();
+			tinymce.get(div.attr("id")).focus();
 		});
 	}
 }
@@ -60,8 +70,8 @@ function animateContainer(div) {
 		"min-height": "50px"
 	}, 100, function() {
 		initTinyMCE();
-		//loadViewer();
-		tinymce.get( /*parseInt(div.attr("id").replace("mce_", "") - 1)*/ div.find(".mce-content-body").attr("id")).focus();
+		loadViewer();
+		tinymce.get(div.find(".mce-content-body").attr("id")).focus();
 	});
 }
 
@@ -90,12 +100,9 @@ $(window).keydown(function(e) {
 		removeNode = false;
 	}
 
-	//if (e.keyCode == 32) {
 	window.setTimeout(function() {
 		setType();
 	}, 1)
-
-	//}
 });
 
 function setType() {
@@ -127,7 +134,7 @@ function remove() {
 			$(focus).find("*").remove();
 			$(focus).slideUp("fast", function() {
 				$(focus).remove();
-				//loadViewer();
+				loadViewer();
 			});
 		}
 	} else if ($(".mce-edit-focus").hasClass("panel-heading") &&
@@ -145,7 +152,7 @@ function remove() {
 				"height": "0px"
 			}, 100, function() {
 				$(focus).parents("div[data-type='container']").first().remove();
-				//loadViewer();
+				loadViewer();
 			});
 		}
 	}

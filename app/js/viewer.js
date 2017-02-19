@@ -22,8 +22,6 @@ function loadViewer() {
 }
 
 function open(target, div) {
-
-
 	if (div.data("open") == 'true') {
 		div.data("open", 'false');
 		div.animateRotate(90, {
