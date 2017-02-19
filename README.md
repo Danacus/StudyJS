@@ -10,17 +10,17 @@ https://www.reddit.com/r/ProgrammerHumor/comments/5un65s/it_took_some_time_to_fi
 Installing
 -------------
 
-`git clone https://github.com/Danacus/StudyJS.git`
-`cd StudyJS-master`
-`npm install`
-`npm start`
+`git clone https://github.com/Danacus/StudyJS.git`  
+`cd StudyJS-master`  
+`npm install`  
+`npm start`  
 
 
 Building
 -------------
 
-To build for your OS, run this command
-`npm run release`
+To build for your OS, run this command  
+`npm run release`  
 
 Contributing
 -------------
