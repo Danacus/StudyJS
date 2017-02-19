@@ -75,7 +75,7 @@ var eqConfig = [{
 				"\\cup",
 				"\\cap",
 				"\\setminus",
-				"\\sqrt{}"
+				"\\sqrt"
 			]
 		]
 	},
@@ -104,9 +104,9 @@ var eqConfig = [{
 		label: "Geometry",
 		latex: [
 			[
-				"\\overline{}",
+				"\\overline",
 				"\\triangle",
-				"\\overrightarrow{}",
+				"\\overrightarrow",
 				"\\cong",
 				"\\ncong",
 				"\\sim",
@@ -167,8 +167,8 @@ var eqConfig = [{
 		label: "Other",
 		latex: [
 			[
-				"_{x}",
-				"^{x}",
+				"_",
+				"^",
 			]
 		]
 	}
@@ -191,8 +191,10 @@ class MQEdit {
 				lat.forEach(function(l) {
 					var td = $('<td><button data-text="' + l + '" type="button" class="btn btn-default">$' + l + '$</button></td>').appendTo(tr);
 					td.children("button").first().click(function() {
-						//answerMathField.typedText($(this).data("text").replace("$", "") + " ");
-						answerMathField.latex(answerMathField.latex() + $(this).data("text").replace("$", ""));
+						//answerMathField.latex(answerMathField.latex() + $(this).data("text").replace("$", ""));
+						answerMathField.cmd($(this).data("text").replace("$", ""));
+						answerMathField.focus();
+						//$("#eq-field").mousedown().mouseup();
 					});
 				})
 			})

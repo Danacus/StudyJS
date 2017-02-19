@@ -44,7 +44,8 @@ input:focus,
 button:focus {
   outline: none;
 }
-.btn:focus {
+.btn:focus,
+a:focus {
   outline: none !important;
 }
 .driveListItem:hover {
