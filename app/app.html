@@ -39,6 +39,7 @@
         function initTinyMCE() {
             var c = [];
 
+            //Load textcolor_map
             if (array != null) {
                 for (var i = 0; i < array.length; i++) {
                     c.push(array[i].toString().replace("#", ""));
@@ -70,7 +71,7 @@
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
-                <!--<a class="navbar-brand" href="#">WebSiteName</a>-->
+
             </div>
             <ul class="nav navbar-nav">
                 <li><a href="#" id="save"><span class="glyphicon glyphicon-save-file"></span></a></li>
@@ -78,13 +79,11 @@
                 <li><a href="#" id="new"><span class="glyphicon glyphicon-file"></span></a></li>
                 <li><a href="#" id="export"><span class="glyphicon glyphicon-export"></span></a></li>
                 <li><a href="#" id="eqedit" data-toggle="modal" data-target="#eq-editor">f(x)</a></li>
-                <!--<li><a href="#" id="colors"><span class="glyphicon glyphicon-tint"></span></a></li>-->
                 <li>
                     <div class="dropdown" style="margin-top: 3px">
                         <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">Colors
                           <span class="caret"></span></button>
                         <ul class="dropdown-menu" id="col">
-                            <!--<li class="dropdown-header" id="col">Colors</li>-->
                             <li><a href="#" id="colors"><span class="glyphicon glyphicon-plus"></span></a></li>
                         </ul>
                     </div>
@@ -114,7 +113,6 @@
         </div>
     </div>
 
-    <!-- Modal -->
     <div class="modal fade" id="eq-editor" role="dialog">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

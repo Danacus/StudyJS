@@ -50,7 +50,7 @@ var template = `
 	        <script>
 	            window.jQuery = window.$;
 	            $(document).ready(function() {
-	                loadViewer(); /* $(".mathquill-rendered-math").children().not(".selectable").remove(); var rem = $(".mathquill-rendered-math").contents().filter(function() { return (this.nodeType === 3); }); rem.remove();*/
+	                loadViewer();
 	            });
 	        </script>
 	        <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 100 } }); </script>
