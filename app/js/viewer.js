@@ -3,7 +3,6 @@ function loadViewer() {
 		$(this).remove();
 	});
 
-
 	$("div[data-type='container']").each(function() {
 		var target = $(this)[0];
 		var div = $("<div data-type='open' data-open='true'><span class='glyphicon glyphicon-chevron-right'></span></div>").insertBefore($(this));
@@ -23,9 +22,7 @@ function loadViewer() {
 }
 
 function open(target, div) {
-	target.find("div[data-type='open']").toggle();
-	target.children("div[data-type='container']").slideToggle("fast");
-	target.find(".panel-body").slideToggle("fast");
+
 
 	if (div.data("open") == 'true') {
 		div.data("open", 'false');
@@ -35,6 +32,9 @@ function open(target, div) {
 			complete: function() {},
 			step: function() {}
 		});
+		target.find("div[data-type='container']").children(".panel").children(".panel-body, .panel-heading").slideDown("fast");
+		target.children(".panel").children(".panel-body").slideDown("fast");
+		target.find("div[data-type='open']").show();
 	} else {
 		div.data("open", 'true');
 		div.animateRotate(0, {
@@ -43,6 +43,9 @@ function open(target, div) {
 			complete: function() {},
 			step: function() {}
 		});
+		target.find("div[data-type='container']").children(".panel").children(".panel-body, .panel-heading").slideUp("fast");
+		target.children(".panel").children(".panel-body").slideUp("fast");
+		target.find("div[data-type='open']").hide();
 	}
 }
 

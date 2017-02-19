@@ -1,47 +1,80 @@
-var EventEmitter = require('events');
-var util = require('util');
+class bootstrapDialog {
+	constructor(properties) {
+		return new Promise(function(resolve) {
+			var d = $(
+				`
+					<div class="modal dialog fade" role="dialog">
+			        <div class="modal-dialog">
+			            <!-- Modal content-->
+			            <div class="modal-content">
+			                <div class="modal-header">
+			                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+			                    <h4 class="modal-title"></h4>
+			                </div>
+			                <div class="modal-body">
+			                    <p></p>
+			                </div>
+			                <div class="modal-footer">
+			                </div>
+			            </div>
+			        </div>
+			    </div>
+				`
+			);
 
-function bootstrapDialog(properties) {
-	EventEmitter.call(this);
-	var self = this;
-	var d = $("#dialog");
+			d.find(".modal-title").text(properties.title || "Dialog");
+			d.find(".modal-body").html(properties.content || "");
+			d.find(".modal-footer").html("");
 
-	d.find(".modal-title").text(properties.title || "Dialog");
-	d.find(".modal-body").html(properties.content || "");
-	d.find(".modal-footer").html("");
+			for (var i = 0; i < properties.buttons.length; i++) {
+				var b = $(`<button type="button" class="btn ${(properties.buttons[i].type || "btn-default")}" data-dismiss="modal">${properties.buttons[i].label}</button>`).appendTo(d.find(".modal-footer"));
+				b.click({
+					button: properties.buttons[i]
+				}, function(e) {
+					resolve(e.data.button);
+				});
+			}
 
-	for (var i = 0; i < properties.buttons.length; i++) {
-		var b = $('<button type="button" class="btn ' + (properties.buttons[i].type || "btn-default") + '" data-dismiss="modal">' + properties.buttons[i].label + '</button>').appendTo(d.find(".modal-footer"));
-		b.click({
-			button: properties.buttons[i]
-		}, function(e) {
-			//e.data.button.onclick();
-			self.emit('click', e.data.button);
+			d.modal("show");
+			d.bind('hidden.bs.modal', function() {
+				$(this).remove();
+			});
 		});
 	}
-
-	d.modal("show");
-	//return self;
 }
 
-util.inherits(bootstrapDialog, EventEmitter);
 
-var bootstrapNotification = function(properties) {
-	var n = $("#notification");
 
-	n.attr("class", "alert " + properties.type);
-	n.html(properties.content);
+class bootstrapNotification {
+	constructor(properties) {
+		this.c = $(
+			`
+			<div class="container" style="z-index: 3; position: absolute; overflow:hidden; margin-top: -50px">
+					<div class="alert ${properties.type} notification">
+						${properties.content}
+					</div>
+			</div>
+			`
+		).appendTo(document.body);
 
-	n.parent().animate({
-		"margin-top": "50px"
-	}, 800);
+		this.n = this.c.children(".notification").first();
 
-	window.setTimeout(function() {
-		n.parent().animate({
-			"margin-top": "-50px"
+		this.n.parent().animate({
+			"margin-top": "50px"
 		}, 800);
-	}, 2500);
+
+		window.setTimeout(() =>
+			this.n.parent().animate({
+				"margin-top": "-50px"
+			}, {
+				duration: 800,
+				complete: () => {
+					this.c.remove();
+				}
+			}), 2500);
+	}
 }
+
 
 export {
 	bootstrapDialog,

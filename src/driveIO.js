@@ -14,8 +14,14 @@ var appRoot = getHomePath() + "/StudyJS";
 var folder;
 var authClient;
 
-class driveIO {
-	static authorize(token, callback) {
+//Singleton reference
+var driveIO;
+
+class DriveIO {
+	constructor() {
+		driveIO = this;
+	}
+	authorize(token, callback) {
 		authorize(token, function(client) {
 			createFolder(client, function() {
 				authClient = client;
@@ -23,18 +29,19 @@ class driveIO {
 			});
 		});
 	}
-	static writeFile(id, content) {
+	writeFile(id, content) {
 		write(authClient, id, content);
 	}
-	static writeNewFile(id, content) {
+	writeNewFile(id, content) {
 		newFile(authClient, id, content);
 	}
-	static openFile(id, callback) {
+	openFile(id, callback) {
 		read(authClient, id, function(data) {
 			callback(data);
+			globals.saved = true;
 		});
 	}
-	static list(callback) {
+	list(callback) {
 		getFiles(authClient, function(data) {
 			callback(data);
 		});
@@ -42,6 +49,7 @@ class driveIO {
 }
 
 export {
+	DriveIO,
 	driveIO
 };
 
@@ -66,7 +74,7 @@ function getFolder(auth, callback) {
 		fields: "nextPageToken, files(id, name)"
 	}, function(err, response) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "The API returned an error: " + err
 			});
@@ -74,7 +82,7 @@ function getFolder(auth, callback) {
 		}
 		var files = response.files;
 		if (files.length == 0) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-warning",
 				content: "No files found"
 			});
@@ -99,7 +107,7 @@ function getFiles(auth, callback) {
 		fields: "nextPageToken, files(id, name)"
 	}, function(err, response) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "The API returned an error: " + err
 			});
@@ -107,7 +115,7 @@ function getFiles(auth, callback) {
 		}
 		var files = response.files;
 		if (files.length == 0) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-warning",
 				content: "No files found"
 			});
@@ -132,10 +140,7 @@ function createFolder(auth, callback) {
 				fields: 'id'
 			}, function(err, file) {
 				if (err) {
-					bootstrapNotification({
-						type: "alert-danger",
-						content: "The API returned an error: " + err
-					});
+
 				} else {
 					folder = file.id;
 					callback();
@@ -166,15 +171,18 @@ function write(auth, fileName, content) {
 		fields: 'id'
 	}, function(err, file) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "Cannot save file! " + err
 			});
 		} else {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-success",
 				content: "File saved!"
 			});
+			globals.currentFile = fileName + " (" + file.id + ")";
+			document.title = globals.title + " - " + globals.currentFile;
+			globals.saved = true;
 		}
 	});
 }
@@ -197,12 +205,12 @@ function newFile(auth, fileName, content) {
 		fields: 'id'
 	}, function(err, file) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "Cannot save file! " + err
 			});
 		} else {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-success",
 				content: "File saved!"
 			});
@@ -226,7 +234,7 @@ function read(auth, id, callback) {
 
 		})
 		.on('error', function(err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "Error during download! " + err
 			});
@@ -234,7 +242,7 @@ function read(auth, id, callback) {
 		.pipe(dest).on("finish", function() {
 			fs.readFile(appRoot + "/" + id + ".json", "utf-8", function(err, data) {
 				if (err) {
-					bootstrapNotification({
+					new bootstrapNotification({
 						type: "alert-danger",
 						content: "Error reading file! " + err
 					});

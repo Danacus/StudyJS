@@ -39,7 +39,36 @@ import {
 
 var appRoot = getHomePath() + "/StudyJS";
 
-var template = '<!doctype html> <html> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> <title>StudyJS</title> <link href="css/main.css" rel="stylesheet" type="text/css"> <link rel="stylesheet" href="css/bootstrap.min.css"> <link rel="stylesheet" href="css/mathquill.css"> </head> <body> <script src="js/jquery-3.1.1.min.js"></script> <script> window.jQuery = window.$; $(document).ready(function() { loadViewer(); /* $(".mathquill-rendered-math").children().not(".selectable").remove(); var rem = $(".mathquill-rendered-math").contents().filter(function() { return (this.nodeType === 3); }); rem.remove();*/ }); </script> <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 80 } }); </script> <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML"> </script> <script src="js/bootstrap.min.js"></script> <script src="js/viewer.js"></script> <script src="js/globals.js"></script> <div id="document"> <!--replaceme--> </div> </body> </html>';
+var template = `
+	<!doctype html>
+	<html>
+
+	<head>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	    <title>StudyJS</title>
+	    <link href="css/main.css" rel="stylesheet" type="text/css">
+			<link rel="stylesheet" href="css/bootstrap.min.css">
+	    <body>
+	        <script src="js/jquery-3.1.1.min.js"></script>
+	        <script>
+	            window.jQuery = window.$;
+	            $(document).ready(function() {
+	                loadViewer(); /* $(".mathquill-rendered-math").children().not(".selectable").remove(); var rem = $(".mathquill-rendered-math").contents().filter(function() { return (this.nodeType === 3); }); rem.remove();*/
+	            });
+	        </script>
+	        <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 100 } }); </script>
+	        <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+	        </script>
+	        <script src="js/bootstrap.min.js"></script>
+	        <script src="js/viewer.js"></script>
+	        <div id="document">
+	            <!--replaceme-->
+	        </div>
+	    </body>
+
+	</html>
+`;
 
 var saving = false,
 	opening = false;
@@ -49,6 +78,7 @@ class AppIO {
 		if (!fs.existsSync(appRoot + "/app/")) {
 			_downloadAssets(function() {
 				_loadColors();
+				loadViewer();
 				loadSettings(function() {
 					if (settings.token) {
 						driveIO.authorize(settings.token, function() {
@@ -59,6 +89,7 @@ class AppIO {
 			});
 		} else {
 			_loadColors();
+			loadViewer();
 			loadSettings(function() {
 				if (settings.token) {
 					driveIO.authorize(settings.token, function() {
@@ -86,7 +117,7 @@ class AppIO {
 						label: "Google Drive",
 					}]
 				})
-				.on('click', function(button) {
+				.then((button) => {
 					if (button.label == "Local") {
 						_saveDialog();
 					} else if (button.label == "Google Drive") {
@@ -98,7 +129,7 @@ class AppIO {
 									type: "btn-primary",
 								}]
 							})
-							.on("click", function() {
+							.then((button) => {
 								if (!globals.authorized) {
 									saving = true;
 									ipcRenderer.send('authorize');
@@ -113,31 +144,32 @@ class AppIO {
 
 	open() {
 		new bootstrapDialog({
-			title: "Open File",
-			content: "Open local file or open file on Google Drive?",
-			buttons: [{
-				label: "Local"
-			}, {
-				label: "Google Drive"
-			}]
-		}).on('click', function(button) {
-			if (button.label == "Local") {
-				_close(function() {
-					$("#dialog").modal("hide");
-					_open();
-				});
-			} else if (button.label == "Google Drive") {
-				_close(function() {
-					$("#dialog").modal("hide");
-					if (!globals.authorized) {
-						opening = true;
-						ipcRenderer.send('authorize');
-					} else {
-						_driveOpen();
-					}
-				});
-			}
-		});
+				title: "Open File",
+				content: "Open local file or open file on Google Drive?",
+				buttons: [{
+					label: "Local"
+				}, {
+					label: "Google Drive"
+				}]
+			})
+			.then((button) => {
+				if (button.label == "Local") {
+					_close(function() {
+						$("#dialog").modal("hide");
+						_open();
+					});
+				} else if (button.label == "Google Drive") {
+					_close(function() {
+						$("#dialog").modal("hide");
+						if (!globals.authorized) {
+							opening = true;
+							ipcRenderer.send('authorize');
+						} else {
+							_driveOpen();
+						}
+					});
+				}
+			});
 	}
 
 	newFile() {
@@ -153,6 +185,7 @@ class AppIO {
 			document.title = globals.title + " - " + (globals.currentFile || "New File");
 			initTinyMCE();
 			updateStyle();
+			loadViewer();
 		});
 	}
 
@@ -177,7 +210,23 @@ class AppIO {
 	}
 
 	addColor() {
-		_addColor();
+		new bootstrapDialog({
+			title: "Import Color",
+			content: "Import from file or from <a href='https://coolors.co/'>coolors.co</a>?",
+			buttons: [{
+					label: "Local"
+				},
+				{
+					label: "Coolors.co"
+				}
+			]
+		}).then((button) => {
+			if (button.label == "Local") {
+				_addColor();
+			} else if (button.label == "Coolors.co") {
+				_importColor();
+			}
+		});
 	}
 
 	loadColors() {
@@ -207,7 +256,7 @@ ipcRenderer.on('token', function(event, message) {
 function writeFile(path, content, callback) {
 	fs.writeFile(path, content, function(err) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "Cannot write file! " + err
 			});
@@ -220,7 +269,7 @@ function writeFile(path, content, callback) {
 function readFile(file, callback) {
 	fs.readFile(file, function(err, data) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "Cannot open file! " + err
 			});
@@ -230,10 +279,45 @@ function readFile(file, callback) {
 	});
 }
 
+function _importColor() {
+	new bootstrapDialog({
+		title: "Import Color",
+		content: '<div class="form-group"><label for="usr">URL:</label><input type="text" class="form-control" id="coolorsUrl"><label for="usr">Name:</label><input type="text" class="form-control" id="coolorsName"></div>',
+		buttons: [{
+			label: "Import"
+		}]
+	}).then((button) => {
+		var url = $("#coolorsUrl").val();
+		var col = url.split("/")[url.split("/").length - 1];
+		var colors = {
+			colors: []
+		};
+
+		var colSplit = col.split("-");
+
+		for (var i = 0; i < colSplit.length; i++) {
+			colors.colors.push("#" + colSplit[i]);
+		}
+
+		var name = $("#coolorsName").val();
+		var file = JSON.stringify(colors);
+
+		console.log(name);
+
+		writeFile(appRoot + "/app/colors/" + name + ".json", file, () => {
+			new bootstrapNotification({
+				type: "alert-success",
+				content: "Color added"
+			});
+			_loadColors();
+		});
+	});
+}
+
 function _addColor() {
 	dialog.showOpenDialog(function(fileNames) {
 		if (fileNames === undefined) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-warning",
 				content: "No file selected!"
 			});
@@ -245,13 +329,13 @@ function _addColor() {
 
 				ncp(fileNames[0], appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1], function(err) {
 					if (err) {
-						bootstrapNotification({
+						new bootstrapNotification({
 							type: "alert-danger",
 							content: "Cannot import color! " + err
 						});
 						return console.error(err);
 					}
-					bootstrapNotification({
+					new bootstrapNotification({
 						type: "alert-success",
 						content: "Color added"
 					});
@@ -265,7 +349,7 @@ function _addColor() {
 function _exportDocument() {
 	var newDoc = $('<div id="document2"></div>').appendTo($(document.body));
 	$(".eq-math").each(function functionName() {
-		$(this).html($(this).data("formula"));
+		$(this).text($(this).data("formula"));
 	});
 	newDoc.html($("#document").html());
 
@@ -276,6 +360,8 @@ function _exportDocument() {
 
 	var file = template.replace("<!--replaceme-->", newDoc.html());
 
+	MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+
 	newDoc.remove();
 	return file;
 }
@@ -283,13 +369,13 @@ function _exportDocument() {
 function _copyAssets(target) {
 	ncp(appRoot + "/app/dist", target, function(err) {
 		if (err) {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-danger",
 				content: "Cannot export file! " + err
 			});
 			return console.error(err);
 		}
-		bootstrapNotification({
+		new bootstrapNotification({
 			type: "alert-success",
 			content: "File exported!"
 		});
@@ -301,7 +387,7 @@ function _driveOpen() {
 	driveIO.list(function(files) {
 		$("#drive-list").children().remove();
 		for (var i = 0; i < files.length; i++) {
-			var item = $('<li class="list-group-item" data-fileid="' + files[i].id + '">' + files[i].name + '</li>').appendTo($("#drive-list"));
+			var item = $('<li class="list-group-item driveListItem" data-fileid="' + files[i].id + '">' + files[i].name + '</li>').appendTo($("#drive-list"));
 			item.click(function() {
 				$("#drive").modal("hide");
 				var id = $(this).data("fileid");
@@ -312,8 +398,9 @@ function _driveOpen() {
 					serializer.deserialize(JSON.parse(data));
 
 					initTinyMCE();
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 					updateStyle();
+					loadViewer();
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 				});
 			});
 		}
@@ -335,29 +422,30 @@ function _driveSave() {
 	}
 
 	driveIO.writeNewFile(filename, serializer.serialize());
+
 	$("#dialog").modal("hide");
 }
 
 function _close(callback) {
 	if (!globals.saved) {
-		bootstrapDialog({
+		new bootstrapDialog({
 			title: "Close without saving?",
 			content: "All changes since the last save will be lost.<br>Are you sure you want to continue?",
 			buttons: [{
 					label: "Yes",
-					onclick: function() {
-						$("#document").html("");
-						callback();
-					}
 				},
 				{
 					label: "No",
 					type: "btn-primary",
-					onclick: function() {
-						return;
-					}
 				}
 			]
+		}).then((button) => {
+			if (button.label == "Yes") {
+				$("#document").html("");
+				callback();
+			} else {
+				return;
+			}
 		});
 	} else {
 		$("#document").html("");
@@ -381,6 +469,7 @@ function _open(success) {
 			initTinyMCE();
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 			updateStyle();
+			loadViewer();
 
 			if (success) success();
 		});
@@ -397,7 +486,7 @@ function _downloadAssets(callback) {
 			}).exec(function() {
 				callback();
 			}, function() {
-				bootstrapNotification({
+				new bootstrapNotification({
 					type: "alert-danger",
 					content: "Failed to download assets"
 				})
@@ -429,7 +518,7 @@ function _loadColors() {
 		}
 	}, function(err) {
 		console.error(err);
-		bootstrapNotification({
+		new bootstrapNotification({
 			type: "alert-danger",
 			content: "Cannot load colors! " + err
 		});
@@ -466,7 +555,7 @@ function _save(file, content, success) {
 		if (success) {
 			success();
 		} else {
-			bootstrapNotification({
+			new bootstrapNotification({
 				type: "alert-success",
 				content: "File saved!"
 			});

@@ -2,15 +2,17 @@ import $ from 'jquery';
 
 var container = "<div data-type='container' data-depth='0'><div class='panel panel-default'><div class='panel-heading' data-type='editable'></div></div></div>";
 
-var editor = {
-	add: {
-		before: 1,
-		after: 2,
-		child: 3,
-		parent: 4
-	},
+class Editor {
+	constructor() {
+		this.add = {
+			before: 1,
+			after: 2,
+			child: 3,
+			parent: 4
+		}
+	}
 
-	addContainer: function(type, attributes = {}) {
+	addContainer(type, attributes = {}) {
 		var div;
 		var parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
 
@@ -25,7 +27,8 @@ var editor = {
 				div = $(container).appendTo(parent);
 				break;
 			case 4:
-				//div = $(container).prependTo($(".mce-edit-focus"));
+				div = $(container).insertAfter(parent);
+				div.append(parent);
 				break;
 			default:
 				return;
@@ -34,10 +37,9 @@ var editor = {
 		div.attr("data-depth", div.parents("div[data-type='container']").length);
 
 		animateContainer(div);
-	},
+	}
 
-	addBody: function() {
-
+	addBody() {
 		var parent = $(".mce-edit-focus").parents(".panel").first();
 		console.log(parent);
 		var div = $("<div class='panel-body' data-type='editable' style='min-height: 0px'></div>").appendTo(parent);
@@ -50,7 +52,7 @@ var editor = {
 			tinymce.get( /*parseInt(div.attr("id").replace("mce_", "") - 1)*/ div.attr("id")).focus();
 		});
 	}
-};
+}
 
 function animateContainer(div) {
 	updateColors();
@@ -158,5 +160,5 @@ function getPrev(s) {
 }
 
 export {
-	editor
+	Editor
 };

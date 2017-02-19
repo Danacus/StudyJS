@@ -175,8 +175,8 @@ var eqConfig = [{
 ]
 
 
-var MQEdit = {
-	load: function() {
+class MQEdit {
+	constructor() {
 		eqConfig.forEach(function(current) {
 			var button = $('<a href="#" class="list-group-item" data-parent="#menu">' + current.label + '</a>').appendTo("#eq-panel");
 			var table = $('<div class="sublinks collapse"><table class="table"><tbody></tbody></table></div>').insertAfter(button);
@@ -197,8 +197,8 @@ var MQEdit = {
 				})
 			})
 		})
-	},
-	open: function() {
+	}
+	open() {
 		console.log("open");
 		var answerSpan = document.getElementById('eq-field');
 		answerMathField = MQ.MathField(answerSpan, {
@@ -209,13 +209,15 @@ var MQEdit = {
 				}
 			}
 		});
+		answerMathField.latex("");
 		enteredMath = answerMathField.latex();
-	},
-	close: function() {
+	}
+	close() {
 		$("#eq-editor").modal("hide");
-	},
-	insert: function() {
-		tinymce.activeEditor.execCommand('mceInsertContent', false, "<span class='eq-math' data-formula='$" + enteredMath + "$'>$" + enteredMath + "$</span>");
+	}
+	insert() {
+		console.log(enteredMath);
+		tinymce.activeEditor.execCommand('mceInsertRawHTML', false, "<span class='eq-math' data-formula='$" + enteredMath + "$'>$" + enteredMath + "$</span><span>&nbsp;</span>");
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 		$("#eq-editor").modal("hide");
 	}

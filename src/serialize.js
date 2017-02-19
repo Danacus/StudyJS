@@ -3,9 +3,17 @@ var json = [];
 var serializer = {
 	serialize: function() {
 		json = [];
+
+		$(".eq-math").each(function functionName() {
+			$(this).text($(this).data("formula"));
+		});
+
 		$("#document").children("[data-type='container']").each(function() {
 			json.push($(this).serialize());
 		});
+
+		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+
 		return JSON.stringify(json);
 	},
 	deserialize: function(obj) {

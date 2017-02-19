@@ -1,7 +1,3 @@
-// Here is the starting point for your application code.
-// All stuff below is just to show you how it works. You can delete all of it.
-
-// Use new ES6 modules syntax for everything.
 import os from 'os'; // native node.js module
 import {
 	remote,
@@ -14,7 +10,7 @@ import {
 import env from './env';
 import $ from 'jquery';
 import {
-	editor
+	Editor
 } from './editor';
 import {
 	AppIO
@@ -27,7 +23,7 @@ import {
 	serializer
 } from './serialize';
 import {
-	driveIO
+	DriveIO
 } from './driveIO';
 import {
 	loadSettings,
@@ -40,22 +36,25 @@ console.log('Loaded environment variables:', env);
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var appIO;
+var driveIO;
+var editor;
+var mqEdit;
 
 $(document).ready(function() {
-	/*
-			if (settings.token) {
-				driveIO.authorize(settings.token, function() {
-
-				});
-			}*/
 	appIO = new AppIO();
-	MQEdit.load();
+	driveIO = new DriveIO();
+	editor = new Editor();
+	mqEdit = new MQEdit();
 	initTinyMCE();
 });
 
-$(document).keypress(function() {
-	globals.saved = false;
-	document.title = globals.title + " - " + (globals.currentFile || "New File") + "*";
+$(document).keypress(function(e) {
+	if (
+		e.which !== 0 && !e.ctrlKey && !e.metaKey && !e.altKey
+	) {
+		globals.saved = false;
+		document.title = globals.title + " - " + (globals.currentFile || "New File") + "*";
+	}
 });
 
 var listener = new window.keypress.Listener();
@@ -82,6 +81,14 @@ listener.simple_combo("ctrl right", function() {
 
 listener.simple_combo("cmd right", function() {
 	editor.addContainer(editor.add.child);
+});
+
+listener.simple_combo("ctrl left", function() {
+	editor.addContainer(editor.add.parent);
+});
+
+listener.simple_combo("cmd left", function() {
+	editor.addContainer(editor.add.parent);
 });
 
 listener.simple_combo("alt down", function() {
@@ -147,19 +154,15 @@ $(document).ready(function() {
 		appIO.addColor();
 	});
 
-	/*$("#styles").click(function() {
-		appIO.addStyle();
-	});*/
-
 	$("#eqedit").click(function() {
-		MQEdit.open();
+		mqEdit.open();
 	});
 
 	$("#eq-insert").click(function() {
-		MQEdit.insert();
+		mqEdit.insert();
 	});
 
 	$("#eq-close").click(function() {
-		MQEdit.close();
+		mqEdit.close();
 	});
 });
