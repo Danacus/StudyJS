@@ -39,30 +39,6 @@ div[data-type='container'] {
 div[data-type='container'] > * {
   margin-top: -15px;
 }
-/*
-div[data-depth='0'] .panel-heading {
-  background-color: @green0;
-}
-
-div[data-depth='1'] .panel-heading {
-  background-color: @green1;
-}
-
-div[data-depth='2'] .panel-heading {
-  background-color: @green2;
-}
-
-div[data-depth='3'] .panel-heading {
-  background-color: @green3;
-}
-
-div[data-depth='4'] .panel-heading {
-  background-color: @green4;
-}
-
-div[data-depth='5'] .panel-heading {
-  background-color: @green4;
-}*/
 textarea:focus,
 input:focus,
 button:focus {

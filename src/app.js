@@ -1,13 +1,8 @@
-import os from 'os'; // native node.js module
+import os from 'os';
 import {
 	remote,
 	ipcRenderer
-} from 'electron'; // native electron module
-import jetpack from 'fs-jetpack'; // module loaded from npm
-import {
-	greet
-} from './hello_world/hello_world'; // code authored by you in this project
-import env from './env';
+} from 'electron';
 import $ from 'jquery';
 import {
 	Editor
@@ -31,10 +26,7 @@ import {
 	settings
 } from './settings';
 
-console.log('Loaded environment variables:', env);
-
 var app = remote.app;
-var appDir = jetpack.cwd(app.getAppPath());
 var appIO;
 var driveIO;
 var editor;

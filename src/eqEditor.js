@@ -205,7 +205,6 @@ class MQEdit {
 			handlers: {
 				edit: function() {
 					enteredMath = answerMathField.latex();
-					//$("#eq-latex").text(enteredMath); // Get entered math in LaTeX format
 				}
 			}
 		});
