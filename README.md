@@ -12,7 +12,7 @@ Installing
 
 `git clone https://github.com/Danacus/StudyJS.git`  
 `cd StudyJS`  
-`npm install`  
+`sudo npm install`  
 `npm start`  
 
 
