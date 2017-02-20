@@ -97,12 +97,11 @@ function getFolder(auth) {
 			if (files.length == 0) {
 				reject("No files found!");
 			} else {
-				for (var i = 0; i < files.length; i++) {
-					var file = files[i];
+				files.forEach((file) => {
 					if (file.name == "StudyJS") {
 						id = file.id;
 					}
-				}
+				});
 				resolve(id);
 			}
 		});

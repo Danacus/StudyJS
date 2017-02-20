@@ -46,7 +46,12 @@ class Editor {
 
 		div.attr("data-depth", div.parents("div[data-type='container']").length);
 
+		div.click(function() {
+			autoScroll($(this));
+		});
+
 		animateContainer(div);
+		autoScroll(div);
 	}
 
 	addBody() {
@@ -62,6 +67,12 @@ class Editor {
 			tinymce.get(div.attr("id")).focus();
 		});
 	}
+}
+
+function autoScroll(element) {
+	$('html, body').animate({
+		scrollTop: element.offset().top - $(window).height() / 2
+	}, 100);
 }
 
 function animateContainer(div) {
@@ -124,9 +135,13 @@ function getFirstWord(str) {
 
 function remove() {
 	console.log("remove");
-	if ($(".mce-edit-focus").hasClass("panel-body")) {
-		if ($(".mce-edit-focus").text() == "") {
-			var focus = $(".mce-edit-focus")[0];
+
+	var focus = $(".mce-edit-focus");
+	var parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
+
+	if (focus.hasClass("panel-body")) {
+		if (focus.text() == "") {
+			var focus = focus[0];
 			var parent = $(focus).parent().children(".panel-heading")[0];
 			initTinyMCE();
 			updateColors();
@@ -137,11 +152,11 @@ function remove() {
 				loadViewer();
 			});
 		}
-	} else if ($(".mce-edit-focus").hasClass("panel-heading") &&
-		($(".mce-edit-focus").parents("div[data-type='container']").first().data("depth") > 0 ||
-			$(".mce-edit-focus").parents("div[data-type='container']").first().parent().children().length > 1)) {
-		if ($(".mce-edit-focus").parents("div[data-type='container']").first().text() == "") {
-			var focus = $(".mce-edit-focus")[0];
+	} else if (focus.hasClass("panel-heading") &&
+		(parent.data("depth") > 0 ||
+			parent.parent().children().length > 1)) {
+		if (parent.text() == "") {
+			var focus = focus[0];
 			$(focus).children().not("div[data-type='container']").remove();
 			var parent = getPrev($(focus).parents("div[data-type='container']").first()).first().find(".panel-heading")[0];
 			initTinyMCE();
