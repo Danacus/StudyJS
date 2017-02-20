@@ -15,8 +15,8 @@ import {
 } from './driveIO';
 
 import {
-	bootstrapDialog,
-	bootstrapNotification
+	showDialog,
+	showNotification
 } from './dialog';
 import {
 	EventEmitter
@@ -104,7 +104,7 @@ class AppIO {
 				_save(file, serializer.serialize());
 			}
 		} else {
-			new bootstrapDialog({
+			showDialog({
 					title: "Save File",
 					content: "Save local or on Google Drive?",
 					buttons: [{
@@ -117,7 +117,7 @@ class AppIO {
 					if (button.label == "Local") {
 						_saveDialog();
 					} else if (button.label == "Google Drive") {
-						new bootstrapDialog({
+						showDialog({
 								title: "Save Remote File",
 								content: '<div class="form-group"><label for="usr">File Name:</label><input type="text" class="form-control" id="fileName"></div>',
 								buttons: [{
@@ -139,7 +139,7 @@ class AppIO {
 	}
 
 	open() {
-		new bootstrapDialog({
+		showDialog({
 				title: "Open File",
 				content: "Open local file or open file on Google Drive?",
 				buttons: [{
@@ -206,7 +206,7 @@ class AppIO {
 	}
 
 	addColor() {
-		new bootstrapDialog({
+		showDialog({
 			title: "Import Color",
 			content: "Import from file or from <a href='https://coolors.co/'>coolors.co</a>?",
 			buttons: [{
@@ -252,7 +252,7 @@ ipcRenderer.on('token', function(event, message) {
 function writeFile(path, content, callback) {
 	fs.writeFile(path, content, function(err) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "Cannot write file! " + err
 			});
@@ -265,7 +265,7 @@ function writeFile(path, content, callback) {
 function readFile(file, callback) {
 	fs.readFile(file, function(err, data) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "Cannot open file! " + err
 			});
@@ -276,7 +276,7 @@ function readFile(file, callback) {
 }
 
 function _importColor() {
-	new bootstrapDialog({
+	showDialog({
 		title: "Import Color",
 		content: '<div class="form-group"><label for="usr">URL:</label><input type="text" class="form-control" id="coolorsUrl"><label for="usr">Name:</label><input type="text" class="form-control" id="coolorsName"></div>',
 		buttons: [{
@@ -301,7 +301,7 @@ function _importColor() {
 		console.log(name);
 
 		writeFile(appRoot + "/app/colors/" + name + ".json", file, () => {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-success",
 				content: "Color added"
 			});
@@ -313,7 +313,7 @@ function _importColor() {
 function _addColor() {
 	dialog.showOpenDialog(function(fileNames) {
 		if (fileNames === undefined) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-warning",
 				content: "No file selected!"
 			});
@@ -325,13 +325,13 @@ function _addColor() {
 
 				ncp(fileNames[0], appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1], function(err) {
 					if (err) {
-						new bootstrapNotification({
+						showNotification({
 							type: "alert-danger",
 							content: "Cannot import color! " + err
 						});
 						return console.error(err);
 					}
-					new bootstrapNotification({
+					showNotification({
 						type: "alert-success",
 						content: "Color added"
 					});
@@ -365,13 +365,13 @@ function _exportDocument() {
 function _copyAssets(target) {
 	ncp(appRoot + "/app/dist", target, function(err) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "Cannot export file! " + err
 			});
 			return console.error(err);
 		}
-		new bootstrapNotification({
+		showNotification({
 			type: "alert-success",
 			content: "File exported!"
 		});
@@ -424,7 +424,7 @@ function _driveSave() {
 
 function _close(callback) {
 	if (!globals.saved) {
-		new bootstrapDialog({
+		showDialog({
 			title: "Close without saving?",
 			content: "All changes since the last save will be lost.<br>Are you sure you want to continue?",
 			buttons: [{
@@ -489,7 +489,7 @@ function _downloadAssets(callback) {
 				},
 
 				error: function(err) {
-					new bootstrapNotification({
+					showNotification({
 						type: "alert-danger",
 						content: "Failed to download assets: " + err
 					})
@@ -522,7 +522,7 @@ function _loadColors() {
 		}
 	}, function(err) {
 		console.error(err);
-		new bootstrapNotification({
+		showNotification({
 			type: "alert-danger",
 			content: "Cannot load colors! " + err
 		});
@@ -559,7 +559,7 @@ function _save(file, content, success) {
 		if (success) {
 			success();
 		} else {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-success",
 				content: "File saved!"
 			});

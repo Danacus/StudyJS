@@ -1,7 +1,6 @@
 import fs from 'fs';
 import {
-	bootstrapDialog,
-	bootstrapNotification
+	showNotification
 } from './dialog';
 import {
 	settings
@@ -74,7 +73,7 @@ function getFolder(auth, callback) {
 		fields: "nextPageToken, files(id, name)"
 	}, function(err, response) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-warning",
 				content: "Cannot authorize Google Drive! Token might be expired!"
 			});
@@ -82,7 +81,7 @@ function getFolder(auth, callback) {
 		}
 		var files = response.files;
 		if (files.length == 0) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-warning",
 				content: "No files found"
 			});
@@ -107,7 +106,7 @@ function getFiles(auth, callback) {
 		fields: "nextPageToken, files(id, name)"
 	}, function(err, response) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "The API returned an error: " + err
 			});
@@ -115,7 +114,7 @@ function getFiles(auth, callback) {
 		}
 		var files = response.files;
 		if (files.length == 0) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-warning",
 				content: "No files found"
 			});
@@ -171,12 +170,12 @@ function write(auth, fileName, content) {
 		fields: 'id'
 	}, function(err, file) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "Cannot save file! " + err
 			});
 		} else {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-success",
 				content: "File saved!"
 			});
@@ -205,12 +204,12 @@ function newFile(auth, fileName, content) {
 		fields: 'id'
 	}, function(err, file) {
 		if (err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "Cannot save file! " + err
 			});
 		} else {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-success",
 				content: "File saved!"
 			});
@@ -234,7 +233,7 @@ function read(auth, id, callback) {
 
 		})
 		.on('error', function(err) {
-			new bootstrapNotification({
+			showNotification({
 				type: "alert-danger",
 				content: "Error during download! " + err
 			});
@@ -242,7 +241,7 @@ function read(auth, id, callback) {
 		.pipe(dest).on("finish", function() {
 			fs.readFile(appRoot + "/" + id + ".json", "utf-8", function(err, data) {
 				if (err) {
-					new bootstrapNotification({
+					showNotification({
 						type: "alert-danger",
 						content: "Error reading file! " + err
 					});

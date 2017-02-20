@@ -2,10 +2,9 @@ var getHomePath = require('home-path');
 var appRoot = getHomePath() + "/StudyJS";
 import fs from 'fs';
 import {
-	bootstrapDialog,
-	bootstrapNotification
+	showNotification
 } from './dialog';
-var Promise = require("promise");
+
 var Bluebird = require("bluebird");
 var readFile = Bluebird.promisify(fs.readFile);
 var writeFile = Bluebird.promisify(fs.writeFile);
@@ -17,7 +16,7 @@ var loadSettings = function(callback) {
 		settings = JSON.parse(data);
 		callback();
 	}).catch(function(err) {
-		new bootstrapNotification({
+		showNotification({
 			type: "alert-danger",
 			content: "Cannot load settings! " + err
 		});
@@ -28,7 +27,7 @@ var saveSettings = function(callback) {
 	writeFile(appRoot + "/settings.json", JSON.stringify(settings)).then(function(data) {
 		callback();
 	}).catch(function(err) {
-		new bootstrapNotification({
+		showNotification({
 			type: "alert-danger",
 			content: "Cannot save settings! " + err
 		});
