@@ -170,7 +170,7 @@ class AppIO {
 	}
 
 	exportFile() {
-		var file = _exportDocument();
+		const file = _exportDocument();
 
 		dialog.showSaveDialog({
 			title: "Export",
@@ -295,20 +295,20 @@ function _importColor() {
 			label: "Import"
 		}]
 	}).then((button) => {
-		var url = $("#coolorsUrl").val();
-		var col = url.split("/")[url.split("/").length - 1];
-		var colors = {
+		const url = $("#coolorsUrl").val();
+		const col = url.split("/")[url.split("/").length - 1];
+		let colors = {
 			colors: []
 		};
 
-		var colSplit = col.split("-");
+		const colSplit = col.split("-");
 
 		colSplit.forEach((color) => {
 			colors.colors.push("#" + color);
 		});
 
-		var name = $("#coolorsName").val();
-		var file = JSON.stringify(colors);
+		const name = $("#coolorsName").val();
+		const file = JSON.stringify(colors);
 
 		console.log(name);
 
@@ -349,7 +349,7 @@ function _addColor() {
 }
 
 function _exportDocument() {
-	var newDoc = $('<div id="document2"></div>').appendTo($(document.body));
+	let newDoc = $('<div id="document2"></div>').appendTo($(document.body));
 	$(".eq-math").each(() => {
 		$(this).html($(this).data("formula"));
 	});
@@ -360,7 +360,7 @@ function _exportDocument() {
 		$(this).removeClass("mce-content-body mce-edit-focus");
 	});
 
-	var file = template.replace("<!--replaceme-->", newDoc.html());
+	const file = template.replace("<!--replaceme-->", newDoc.html());
 
 	MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
@@ -389,14 +389,14 @@ function _driveOpen() {
 	driveIO.list().then((files) => {
 		$("#drive-list").children().remove();
 		files.forEach((file) => {
-			var item = $(`<li
+			let item = $(`<li
 				class="list-group-item driveListItem"
 				data-fileid="${file.id}">${file.name}</li>`)
 				.appendTo($("#drive-list"));
 			item.click(function() {
 				$("#drive").modal("hide");
-				var id = $(this).data("fileid");
-				var name = $(this).text();
+				const id = $(this).data("fileid");
+				const name = $(this).text();
 				driveIO.openFile(id).then((data) => {
 					globals.currentFile = name + " (" + id + ")";
 					document.title = globals.title + " - " + globals.currentFile;
@@ -418,7 +418,7 @@ function _driveSave() {
 		$(this).html($(this).data("formula"));
 	});
 
-	var filename;
+	let filename;
 
 	if ($("#fileName").val().endsWith(".json")) {
 		filename = $("#fileName").val();
@@ -515,10 +515,10 @@ function _resetTinyMCE() {
 
 function _loadColors() {
 	$(".color-item").remove();
-	var col = _readDir(appRoot + "/app/colors/").then((colors) => {
+	_readDir(appRoot + "/app/colors/").then((colors) => {
 		console.log("Load Colors");
 		colors.forEach((colorItem, index) => {
-			var li = $(`<li
+			let li = $(`<li
 				class='color-item'
 				data-index=${index}><a href='#'>${colorItem.name.unCamelCase()}</a></li>`)
 				.prependTo($("#col"));
@@ -575,7 +575,7 @@ function _save(file, content) {
 
 function _readDir(dirname) {
 	return new Promise(function(resolve, reject) {
-		var files = [];
+		let files = [];
 
 		fs.readdir(dirname, function(err, filenames) {
 			if (err) {

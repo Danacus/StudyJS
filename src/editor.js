@@ -20,8 +20,8 @@ class Editor {
 	}
 
 	addContainer(type, attributes = {}) {
-		var div;
-		var parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
+		let div;
+		let parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
 
 		switch (type) {
 			case 1:
@@ -55,9 +55,8 @@ class Editor {
 	}
 
 	addBody() {
-		var parent = $(".mce-edit-focus").parents(".panel").first();
-		console.log(parent);
-		var div = $("<div class='panel-body' data-type='editable' style='min-height: 0px'></div>").appendTo(parent);
+		let parent = $(".mce-edit-focus").parents(".panel").first();
+		let div = $("<div class='panel-body' data-type='editable' style='min-height: 0px'></div>").appendTo(parent);
 		updateColors();
 		div.animate({
 			"min-height": "50px"
@@ -136,13 +135,13 @@ function getFirstWord(str) {
 function remove() {
 	console.log("remove");
 
-	var focus = $(".mce-edit-focus");
-	var parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
+	let focus = $(".mce-edit-focus");
+	let parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
 
 	if (focus.hasClass("panel-body")) {
 		if (focus.text() == "") {
-			var focus = focus[0];
-			var parent = $(focus).parent().children(".panel-heading")[0];
+			focus = focus[0];
+			parent = $(focus).parent().children(".panel-heading")[0];
 			initTinyMCE();
 			updateColors();
 			tinymce.get($(parent).attr("id")).focus();
@@ -156,9 +155,9 @@ function remove() {
 		(parent.data("depth") > 0 ||
 			parent.parent().children().length > 1)) {
 		if (parent.text() == "") {
-			var focus = focus[0];
+			focus = focus[0];
 			$(focus).children().not("div[data-type='container']").remove();
-			var parent = getPrev($(focus).parents("div[data-type='container']").first()).first().find(".panel-heading")[0];
+			parent = getPrev($(focus).parents("div[data-type='container']").first()).first().find(".panel-heading")[0];
 			initTinyMCE();
 			updateColors();
 			tinymce.get($(parent).attr("id")).focus();

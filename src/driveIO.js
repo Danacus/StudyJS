@@ -15,6 +15,7 @@ var authClient;
 
 //Singleton reference
 var driveIO;
+const service = google.drive('v3');
 
 class DriveIO {
 	constructor() {
@@ -69,11 +70,11 @@ export {
 
 function authorize(code) {
 	return new Promise(function(resolve) {
-		var clientSecret = 'k-YWdpaWFXX4xTiwWMf2oME9';
-		var clientId = '201706695524-djkbgve14lj7q789aoavb5rpjpruhtgc.apps.googleusercontent.com';
-		var redirectUrl = 'http://localhost';
-		var auth = new googleAuth();
-		var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+		const clientSecret = 'k-YWdpaWFXX4xTiwWMf2oME9';
+		const clientId = '201706695524-djkbgve14lj7q789aoavb5rpjpruhtgc.apps.googleusercontent.com';
+		const redirectUrl = 'http://localhost';
+		const auth = new googleAuth();
+		const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
 		oauth2Client.credentials.access_token = code;
 		resolve(oauth2Client);
@@ -82,7 +83,6 @@ function authorize(code) {
 
 function getFolder(auth) {
 	return new Promise(function(resolve, reject) {
-		var service = google.drive('v3');
 		var id = null;
 		service.files.list({
 			auth: auth,
@@ -110,7 +110,6 @@ function getFolder(auth) {
 
 function getFiles(auth) {
 	return new Promise(function(resolve, reject) {
-		var service = google.drive('v3');
 		service.files.list({
 			auth: auth,
 			parents: [folder],
@@ -135,12 +134,11 @@ function createFolder(auth) {
 	return new Promise(function(resolve, reject) {
 		getFolder(auth).then((id) => {
 			if (id == null) {
-				var fileMetadata = {
+				const fileMetadata = {
 					'name': 'StudyJS',
 					'mimeType': 'application/vnd.google-apps.folder'
 				};
-				var drive = google.drive('v3');
-				drive.files.create({
+				service.files.create({
 					auth: auth,
 					resource: fileMetadata,
 					fields: 'id'
@@ -163,15 +161,11 @@ function createFolder(auth) {
 }
 
 function update(auth, fileName, content) {
-	var fileMetadata = {
-		//parents: [folder]
-	};
-	var media = {
+	const media = {
 		mimeType: 'text/json',
 		body: content
 	};
-	var drive = google.drive('v3');
-	drive.files.update({
+	service.files.update({
 		auth: auth,
 		fileId: fileName,
 		media: media,
@@ -197,17 +191,16 @@ function update(auth, fileName, content) {
 }
 
 function newFile(auth, fileName, content) {
-	var media = {
+	const media = {
 		mimeType: 'text/json',
 		body: content
 	};
-	var fileMetadata = {
+	const fileMetadata = {
 		'name': fileName,
 		'mimeType': 'text/json',
 		parents: [folder]
 	};
-	var drive = google.drive('v3');
-	drive.files.create({
+	service.files.create({
 		auth: auth,
 		media: media,
 		resource: fileMetadata,
@@ -232,11 +225,9 @@ function newFile(auth, fileName, content) {
 
 function read(auth, id) {
 	return new Promise(function(resolve, reject) {
-		var fileId = id;
-		var dest = fs.createWriteStream(appRoot + "/" + id + ".json");
-		var drive = google.drive('v3');
-		drive.files.get({
-				fileId: fileId,
+		const dest = fs.createWriteStream(appRoot + "/" + id + ".json");
+		service.files.get({
+				fileId: id,
 				alt: 'media',
 				auth: auth
 			})
