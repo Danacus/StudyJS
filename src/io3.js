@@ -77,7 +77,7 @@ class AppIO {
 				loadViewer();
 				loadSettings(function() {
 					if (settings.token) {
-						driveIO.authorize(settings.token, function() {
+						driveIO.authorize(settings.token).then(() => {
 							globals.authorized = true;
 						});
 					}
@@ -88,7 +88,7 @@ class AppIO {
 			loadViewer();
 			loadSettings(function() {
 				if (settings.token) {
-					driveIO.authorize(settings.token, function() {
+					driveIO.authorize(settings.token).then(() => {
 						globals.authorized = true;
 					});
 				}
@@ -233,7 +233,7 @@ class AppIO {
 ipcRenderer.on('token', function(event, message) {
 	settings.token = message;
 	saveSettings(function() {
-		driveIO.authorize(message, function() {
+		driveIO.authorize(message).then(() => {
 			globals.authorized = true;
 
 			if (saving) {
@@ -380,7 +380,7 @@ function _copyAssets(target) {
 }
 
 function _driveOpen() {
-	driveIO.list(function(files) {
+	driveIO.list().then((files) => {
 		$("#drive-list").children().remove();
 		for (var i = 0; i < files.length; i++) {
 			var item = $('<li class="list-group-item driveListItem" data-fileid="' + files[i].id + '">' + files[i].name + '</li>').appendTo($("#drive-list"));
@@ -388,7 +388,7 @@ function _driveOpen() {
 				$("#drive").modal("hide");
 				var id = $(this).data("fileid");
 				var name = $(this).text();
-				driveIO.openFile(id, function(data) {
+				driveIO.openFile(id).then((data) => {
 					globals.currentFile = name + " (" + id + ")";
 					document.title = globals.title + " - " + globals.currentFile;
 					serializer.deserialize(JSON.parse(data));

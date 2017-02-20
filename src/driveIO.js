@@ -20,29 +20,43 @@ class DriveIO {
 	constructor() {
 		driveIO = this;
 	}
-	authorize(token, callback) {
-		authorize(token, function(client) {
-			createFolder(client, function() {
-				authClient = client;
-				callback();
+	authorize(token) {
+		return new Promise(function(resolve, reject) {
+			authorize(token).then((client) => {
+				createFolder(client).then(() => {
+					authClient = client;
+					resolve();
+				}).catch((err) => {
+					reject(err);
+				});
+			}).catch((err) => {
+				reject(err);
 			});
 		});
 	}
 	writeFile(id, content) {
-		write(authClient, id, content);
+		update(authClient, id, content);
 	}
 	writeNewFile(id, content) {
 		newFile(authClient, id, content);
 	}
-	openFile(id, callback) {
-		read(authClient, id, function(data) {
-			callback(data);
-			globals.saved = true;
+	openFile(id) {
+		return new Promise(function(resolve, reject) {
+			read(authClient, id).then((data) => {
+				globals.saved = true;
+				resolve(data);
+			}).catch((err) => {
+				reject(err);
+			});
 		});
 	}
-	list(callback) {
-		getFiles(authClient, function(data) {
-			callback(data);
+	list() {
+		return new Promise(function(resolve, reject) {
+			getFiles(authClient).then((data) => {
+				resolve(data);
+			}).catch((err) => {
+				reject(err);
+			});
 		});
 	}
 }
@@ -53,106 +67,103 @@ export {
 };
 
 
-function authorize(code, callback) {
-	var clientSecret = 'k-YWdpaWFXX4xTiwWMf2oME9';
-	var clientId = '201706695524-djkbgve14lj7q789aoavb5rpjpruhtgc.apps.googleusercontent.com';
-	var redirectUrl = 'http://localhost';
-	var auth = new googleAuth();
-	var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+function authorize(code) {
+	return new Promise(function(resolve) {
+		var clientSecret = 'k-YWdpaWFXX4xTiwWMf2oME9';
+		var clientId = '201706695524-djkbgve14lj7q789aoavb5rpjpruhtgc.apps.googleusercontent.com';
+		var redirectUrl = 'http://localhost';
+		var auth = new googleAuth();
+		var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-	oauth2Client.credentials.access_token = code;
-	callback(oauth2Client);
+		oauth2Client.credentials.access_token = code;
+		resolve(oauth2Client);
+	});
 }
 
-function getFolder(auth, callback) {
-	var service = google.drive('v3');
-	var id = null;
-	service.files.list({
-		auth: auth,
-		mimeType: 'application/vnd.google-apps.folder',
-		fields: "nextPageToken, files(id, name)"
-	}, function(err, response) {
-		if (err) {
-			showNotification({
-				type: "alert-warning",
-				content: "Cannot authorize Google Drive! Token might be expired!"
-			});
-			return;
-		}
-		var files = response.files;
-		if (files.length == 0) {
-			showNotification({
-				type: "alert-warning",
-				content: "No files found"
-			});
-		} else {
-			for (var i = 0; i < files.length; i++) {
-				var file = files[i];
-				if (file.name == "StudyJS") {
-					id = file.id;
-				}
+function getFolder(auth) {
+	return new Promise(function(resolve, reject) {
+		var service = google.drive('v3');
+		var id = null;
+		service.files.list({
+			auth: auth,
+			mimeType: 'application/vnd.google-apps.folder',
+			fields: "nextPageToken, files(id, name)"
+		}, function(err, response) {
+			if (err) {
+				reject("Cannot authorize Google Drive! Token might be expired!");
+				return;
 			}
-			callback(id);
-		}
-	});
-}
-
-function getFiles(auth, callback) {
-	var service = google.drive('v3');
-	service.files.list({
-		auth: auth,
-		parents: [folder],
-		mimeType: "application/json",
-		fields: "nextPageToken, files(id, name)"
-	}, function(err, response) {
-		if (err) {
-			showNotification({
-				type: "alert-danger",
-				content: "The API returned an error: " + err
-			});
-			return;
-		}
-		var files = response.files;
-		if (files.length == 0) {
-			showNotification({
-				type: "alert-warning",
-				content: "No files found"
-			});
-		} else {
-			callback(files);
-		}
-	});
-}
-
-function createFolder(auth, callback) {
-	getFolder(auth, function(id) {
-		console.log(id);
-		if (id == null) {
-			var fileMetadata = {
-				'name': 'StudyJS',
-				'mimeType': 'application/vnd.google-apps.folder'
-			};
-			var drive = google.drive('v3');
-			drive.files.create({
-				auth: auth,
-				resource: fileMetadata,
-				fields: 'id'
-			}, function(err, file) {
-				if (err) {
-
-				} else {
-					folder = file.id;
-					callback();
+			var files = response.files;
+			if (files.length == 0) {
+				reject("No files found!");
+			} else {
+				for (var i = 0; i < files.length; i++) {
+					var file = files[i];
+					if (file.name == "StudyJS") {
+						id = file.id;
+					}
 				}
-			});
-		} else {
-			folder = id;
-			callback();
-		}
+				resolve(id);
+			}
+		});
 	});
 }
 
-function write(auth, fileName, content) {
+function getFiles(auth) {
+	return new Promise(function(resolve, reject) {
+		var service = google.drive('v3');
+		service.files.list({
+			auth: auth,
+			parents: [folder],
+			mimeType: "application/json",
+			fields: "nextPageToken, files(id, name)"
+		}, function(err, response) {
+			if (err) {
+				reject(err);
+				return;
+			}
+			var files = response.files;
+			if (files.length == 0) {
+				reject("No files found!");
+			} else {
+				resolve(files);
+			}
+		});
+	});
+}
+
+function createFolder(auth) {
+	return new Promise(function(resolve, reject) {
+		getFolder(auth).then((id) => {
+			if (id == null) {
+				var fileMetadata = {
+					'name': 'StudyJS',
+					'mimeType': 'application/vnd.google-apps.folder'
+				};
+				var drive = google.drive('v3');
+				drive.files.create({
+					auth: auth,
+					resource: fileMetadata,
+					fields: 'id'
+				}, function(err, file) {
+					if (err) {
+						reject(err);
+					} else {
+						folder = file.id;
+						resolve();
+					}
+				});
+			} else {
+				folder = id;
+				resolve();
+			}
+		}).catch((err) => {
+			reject(err);
+		});
+	});
+}
+
+function update(auth, fileName, content) {
 	var fileMetadata = {
 		//parents: [folder]
 	};
@@ -220,35 +231,26 @@ function newFile(auth, fileName, content) {
 	});
 }
 
-function read(auth, id, callback) {
-	var fileId = id;
-	var dest = fs.createWriteStream(appRoot + "/" + id + ".json");
-	var drive = google.drive('v3');
-	drive.files.get({
-			fileId: fileId,
-			alt: 'media',
-			auth: auth
-		})
-		.on('end', function() {
-
-		})
-		.on('error', function(err) {
-			showNotification({
-				type: "alert-danger",
-				content: "Error during download! " + err
+function read(auth, id) {
+	return new Promise(function(resolve, reject) {
+		var fileId = id;
+		var dest = fs.createWriteStream(appRoot + "/" + id + ".json");
+		var drive = google.drive('v3');
+		drive.files.get({
+				fileId: fileId,
+				alt: 'media',
+				auth: auth
+			})
+			.on('error', function(err) {
+				reject("Error during download! " + err);
+			})
+			.pipe(dest).on("finish", function() {
+				fs.readFile(appRoot + "/" + id + ".json", "utf-8", function(err, data) {
+					if (err) {
+						reject("Error reading file! " + err);
+					}
+					resolve(data);
+				});
 			});
-		})
-		.pipe(dest).on("finish", function() {
-			fs.readFile(appRoot + "/" + id + ".json", "utf-8", function(err, data) {
-				if (err) {
-					showNotification({
-						type: "alert-danger",
-						content: "Error reading file! " + err
-					});
-					return console.error(err);
-				}
-
-				callback(data);
-			});
-		});
+	});
 }

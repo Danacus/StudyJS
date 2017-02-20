@@ -51,7 +51,8 @@ function showNotification(properties) {
 						z-index: 3;
 						position: absolute;
 						overflow:hidden;
-						margin-top: -50px">
+						margin-top: -50px;
+						width: 80%;">
 				<div class="alert ${properties.type} notification">
 					${properties.content}
 				</div>
