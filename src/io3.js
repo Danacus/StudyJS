@@ -73,26 +73,10 @@ class AppIO {
 	constructor() {
 		if (!fs.existsSync(appRoot + "/app/")) {
 			_downloadAssets(function() {
-				_loadColors();
-				loadViewer();
-				loadSettings(function() {
-					if (settings.token) {
-						driveIO.authorize(settings.token).then(() => {
-							globals.authorized = true;
-						});
-					}
-				});
+				_load();
 			});
 		} else {
-			_loadColors();
-			loadViewer();
-			loadSettings(function() {
-				if (settings.token) {
-					driveIO.authorize(settings.token).then(() => {
-						globals.authorized = true;
-					});
-				}
-			});
+			_load();
 		}
 	}
 
@@ -198,8 +182,13 @@ class AppIO {
 			if (folderPaths === undefined) {
 				return;
 			} else {
-				writeFile(folderPaths, file, function() {
-					_copyAssets(folderPaths.replace(folderPaths.split("/")[folderPaths.split("/").length - 1], ""));
+				writeFile(folderPaths, file).then(() => {
+					_copyAssets(
+						folderPaths.replace(
+							folderPaths.split("/")[folderPaths.split("/").length - 1],
+							""
+						)
+					);
 				});
 			}
 		});
@@ -232,7 +221,7 @@ class AppIO {
 
 ipcRenderer.on('token', function(event, message) {
 	settings.token = message;
-	saveSettings(function() {
+	saveSettings().then(() => {
 		driveIO.authorize(message).then(() => {
 			globals.authorized = true;
 
@@ -249,29 +238,47 @@ ipcRenderer.on('token', function(event, message) {
 	});
 });
 
-function writeFile(path, content, callback) {
-	fs.writeFile(path, content, function(err) {
-		if (err) {
-			showNotification({
-				type: "alert-danger",
-				content: "Cannot write file! " + err
-			});
-			return console.error(err);
-		}
-		callback();
+function writeFile(path, content) {
+	return new Promise(function(resolve, reject) {
+		fs.writeFile(path, content, function(err) {
+			if (err) {
+				showNotification({
+					type: "alert-danger",
+					content: "Cannot write file! " + err
+				});
+				reject();
+				return console.error(err);
+			}
+			resolve();
+		});
 	});
 }
 
 function readFile(file, callback) {
-	fs.readFile(file, function(err, data) {
-		if (err) {
-			showNotification({
-				type: "alert-danger",
-				content: "Cannot open file! " + err
+	return new Promise(function(resolve, reject) {
+		fs.readFile(file, function(err, data) {
+			if (err) {
+				showNotification({
+					type: "alert-danger",
+					content: "Cannot open file! " + err
+				});
+				reject();
+				return console.error(err);
+			}
+			resolve(data);
+		});
+	});
+}
+
+function _load() {
+	_loadColors();
+	loadViewer();
+	loadSettings().then(() => {
+		if (settings.token) {
+			driveIO.authorize(settings.token).then(() => {
+				globals.authorized = true;
 			});
-			return console.error(err);
 		}
-		callback(data);
 	});
 }
 
@@ -300,7 +307,7 @@ function _importColor() {
 
 		console.log(name);
 
-		writeFile(appRoot + "/app/colors/" + name + ".json", file, () => {
+		writeFile(appRoot + "/app/colors/" + name + ".json", file).then(() => {
 			showNotification({
 				type: "alert-success",
 				content: "Color added"
@@ -318,25 +325,19 @@ function _addColor() {
 				content: "No file selected!"
 			});
 		} else {
-			fs.readFile(fileNames[0], function(err, data) {
+			ncp(fileNames[0], appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1], function(err) {
 				if (err) {
+					showNotification({
+						type: "alert-danger",
+						content: "Cannot import color! " + err
+					});
 					return console.error(err);
 				}
-
-				ncp(fileNames[0], appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1], function(err) {
-					if (err) {
-						showNotification({
-							type: "alert-danger",
-							content: "Cannot import color! " + err
-						});
-						return console.error(err);
-					}
-					showNotification({
-						type: "alert-success",
-						content: "Color added"
-					});
-					_loadColors();
+				showNotification({
+					type: "alert-success",
+					content: "Color added"
 				});
+				_loadColors();
 			});
 		}
 	});
@@ -344,8 +345,8 @@ function _addColor() {
 
 function _exportDocument() {
 	var newDoc = $('<div id="document2"></div>').appendTo($(document.body));
-	$(".eq-math").each(function functionName() {
-		$(this).text($(this).data("formula"));
+	$(".eq-math").each(() => {
+		$(this).html($(this).data("formula"));
 	});
 	newDoc.html($("#document").html());
 
@@ -405,7 +406,7 @@ function _driveOpen() {
 }
 
 function _driveSave() {
-	$(".eq-math").each(function functionName() {
+	$(".eq-math").each(() => {
 		$(this).html($(this).data("formula"));
 	});
 
@@ -449,7 +450,7 @@ function _close(callback) {
 	}
 }
 
-function _open(success) {
+function _open() {
 	dialog.showOpenDialog({
 		title: "Open File",
 		filters: [{
@@ -457,7 +458,7 @@ function _open(success) {
 			extensions: ['xml', 'json']
 		}]
 	}, function(fileNames) {
-		readFile(fileNames[0], function(data) {
+		readFile(fileNames[0]).then((data) => {
 			globals.currentFile = fileNames[0];
 			document.title = globals.projectTitle + " - " + globals.currentFile;
 			serializer.deserialize(JSON.parse(data));
@@ -466,9 +467,7 @@ function _open(success) {
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 			updateStyle();
 			loadViewer();
-
-			if (success) success();
-		});
+		})
 	});
 }
 
@@ -507,9 +506,8 @@ function _resetTinyMCE() {
 }
 
 function _loadColors() {
-	//var colors = [];
 	$(".color-item").remove();
-	var col = _readFiles(appRoot + "/app/colors/", function(colors) {
+	var col = _readDir(appRoot + "/app/colors/").then((colors) => {
 		console.log("Load Colors");
 		for (var i = 0; i < colors.length; i++) {
 			var li = $("<li class='color-item' data-index=" + i + "><a href='#'>" + colors[i].name.unCamelCase() + "</a></li>").prependTo($("#col"));
@@ -520,7 +518,7 @@ function _loadColors() {
 				_resetTinyMCE();
 			});
 		}
-	}, function(err) {
+	}).catch((err) => {
 		console.error(err);
 		showNotification({
 			type: "alert-danger",
@@ -546,50 +544,46 @@ function _saveDialog() {
 	});
 }
 
-function _save(file, content, success) {
-	$(".eq-math").each(function functionName() {
+function _save(file, content) {
+	$(".eq-math").each(() => {
 		$(this).html($(this).data("formula"));
 	});
-	writeFile(file, content, function(err) {
+	writeFile(file, content).then(() => {
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 		console.log("Data written successfully!");
 		document.title = globals.title + " - " + globals.currentFile;
 		globals.saved = true;
 		updateStyle();
-		if (success) {
-			success();
-		} else {
-			showNotification({
-				type: "alert-success",
-				content: "File saved!"
-			});
-		}
+
+		showNotification({
+			type: "alert-success",
+			content: "File saved!"
+		});
 	});
 }
 
-function _readFiles(dirname, onFileContent, onError) {
+function _readDir(dirname) {
+	return new Promise(function(resolve, reject) {
+		var files = [];
 
-	var files = [];
-
-	fs.readdir(dirname, function(err, filenames) {
-		if (err) {
-			onError(err);
-			return;
-		}
-		for (var i = 0; i < filenames.length; i++) {
-			var filename = filenames[i];
-			files.push({
-				name: filename.replace(".json", ""),
-				col: JSON.parse(fs.readFileSync(dirname + filename, 'utf-8')).colors
-			});
-
-			if (i == filenames.length - 1) {
-				onFileContent(files);
+		fs.readdir(dirname, function(err, filenames) {
+			if (err) {
+				reject(err);
+				return;
 			}
-		}
-	});
+			for (var i = 0; i < filenames.length; i++) {
+				var filename = filenames[i];
+				files.push({
+					name: filename.replace(".json", ""),
+					col: JSON.parse(fs.readFileSync(dirname + filename, 'utf-8')).colors
+				});
 
-	return files;
+				if (i == filenames.length - 1) {
+					resolve(files);
+				}
+			}
+		});
+	});
 }
 
 String.prototype.unCamelCase = function() {

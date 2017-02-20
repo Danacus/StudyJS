@@ -4,8 +4,8 @@ class serializer {
 	static serialize() {
 		json = [];
 
-		$(".eq-math").each(function functionName() {
-			$(this).text($(this).data("formula"));
+		$(".eq-math").each(() => {
+			$(this).html($(this).data("formula"));
 		});
 
 		$("#document").children("[data-type='container']").each(function() {
