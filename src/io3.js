@@ -277,6 +277,11 @@ function _load() {
 		if (settings.token) {
 			driveIO.authorize(settings.token).then(() => {
 				globals.authorized = true;
+			}).catch((err) => {
+				showNotification({
+					type: 'alert-warning',
+					content: err
+				})
 			});
 		}
 	});
@@ -298,9 +303,9 @@ function _importColor() {
 
 		var colSplit = col.split("-");
 
-		for (var i = 0; i < colSplit.length; i++) {
-			colors.colors.push("#" + colSplit[i]);
-		}
+		colSplit.forEach((color) => {
+			colors.colors.push("#" + color);
+		});
 
 		var name = $("#coolorsName").val();
 		var file = JSON.stringify(colors);
@@ -383,8 +388,11 @@ function _copyAssets(target) {
 function _driveOpen() {
 	driveIO.list().then((files) => {
 		$("#drive-list").children().remove();
-		for (var i = 0; i < files.length; i++) {
-			var item = $('<li class="list-group-item driveListItem" data-fileid="' + files[i].id + '">' + files[i].name + '</li>').appendTo($("#drive-list"));
+		files.forEach((file) => {
+			var item = $(`<li
+				class="list-group-item driveListItem"
+				data-fileid="${file.id}">${file.name}</li>`)
+				.appendTo($("#drive-list"));
 			item.click(function() {
 				$("#drive").modal("hide");
 				var id = $(this).data("fileid");
@@ -400,7 +408,7 @@ function _driveOpen() {
 					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 				});
 			});
-		}
+		});
 		$("#drive").modal("show");
 	});
 }
@@ -509,15 +517,18 @@ function _loadColors() {
 	$(".color-item").remove();
 	var col = _readDir(appRoot + "/app/colors/").then((colors) => {
 		console.log("Load Colors");
-		for (var i = 0; i < colors.length; i++) {
-			var li = $("<li class='color-item' data-index=" + i + "><a href='#'>" + colors[i].name.unCamelCase() + "</a></li>").prependTo($("#col"));
+		colors.forEach((colorItem, index) => {
+			var li = $(`<li
+				class='color-item'
+				data-index=${index}><a href='#'>${colorItem.name.unCamelCase()}</a></li>`)
+				.prependTo($("#col"));
 
 			li.children(":first").click(function() {
 				setColors(colors[$(this).parent().data("index")].col);
 				updateStyle();
 				_resetTinyMCE();
 			});
-		}
+		});
 	}).catch((err) => {
 		console.error(err);
 		showNotification({
@@ -571,17 +582,16 @@ function _readDir(dirname) {
 				reject(err);
 				return;
 			}
-			for (var i = 0; i < filenames.length; i++) {
-				var filename = filenames[i];
+			filenames.forEach((filename, index) => {
 				files.push({
 					name: filename.replace(".json", ""),
 					col: JSON.parse(fs.readFileSync(dirname + filename, 'utf-8')).colors
 				});
 
-				if (i == filenames.length - 1) {
+				if (index == filenames.length - 1) {
 					resolve(files);
 				}
-			}
+			});
 		});
 	});
 }
