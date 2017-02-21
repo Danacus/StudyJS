@@ -1,6 +1,13 @@
 var globals = {
-	currentFile: null,
+	file: {
+		id: null,
+		name: null,
+		path: null
+	},
+	service: null,
 	saved: true,
 	title: "StudyJS",
-	authorized: false
+	drive: {
+		authorized: false
+	}
 }

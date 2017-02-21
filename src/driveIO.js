@@ -1,10 +1,20 @@
 import fs from 'fs';
 import {
-	showNotification
+	ipcRenderer
+} from 'electron';
+import {
+	showNotification,
+	showFilesList
 } from './dialog';
 import {
+	serializer
+} from './serialize';
+import {
+	loadSettings,
+	saveSettings,
 	settings
 } from './settings';
+
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 var getHomePath = require('home-path');
@@ -13,6 +23,8 @@ var appRoot = getHomePath() + "/StudyJS";
 var folder;
 var authClient;
 
+var authorizeCallback;
+
 //Singleton reference
 var driveIO;
 const service = google.drive('v3');
@@ -20,46 +32,59 @@ const service = google.drive('v3');
 class DriveIO {
 	constructor() {
 		driveIO = this;
+
+		loadSettings().then(() => {
+			if (settings.drive.token) {
+				authorizeDrive(settings.drive.token).then(() => {
+					globals.drive.authorized = true;
+				}).catch((err) => {
+					showNotification({
+						type: 'alert-warning',
+						content: err
+					})
+				});
+			}
+		});
 	}
-	authorize(token) {
+	writeFile(createNew) {
 		return new Promise(function(resolve, reject) {
-			authorize(token).then((client) => {
-				createFolder(client).then(() => {
-					authClient = client;
+			if (!globals.drive.authorized) {
+				authorizeCallback = "save";
+				requestToken();
+				return;
+			}
+
+			if (!createNew) {
+				update(authClient, globals.file.id, serializer.serialize()).then(() => {
 					resolve();
 				}).catch((err) => {
 					reject(err);
 				});
-			}).catch((err) => {
-				reject(err);
-			});
+			} else {
+				newFile(authClient, globals.file.name, serializer.serialize()).then(() => {
+					resolve();
+				}).catch((err) => {
+					reject(err);
+				});
+			}
 		});
 	}
-	writeFile(id, content) {
-		update(authClient, id, content);
-	}
-	writeNewFile(id, content) {
-		newFile(authClient, id, content);
-	}
-	openFile(id) {
+	openFile() {
 		return new Promise(function(resolve, reject) {
-			read(authClient, id).then((data) => {
-				globals.saved = true;
-				resolve(data);
+			if (!globals.drive.authorized) {
+				authorizeCallback = "open";
+				requestToken();
+				return;
+			}
+
+			open().then(() => {
+				resolve();
 			}).catch((err) => {
 				reject(err);
 			});
 		});
 	}
-	list() {
-		return new Promise(function(resolve, reject) {
-			getFiles(authClient).then((data) => {
-				resolve(data);
-			}).catch((err) => {
-				reject(err);
-			});
-		});
-	}
+
 }
 
 export {
@@ -67,8 +92,87 @@ export {
 	driveIO
 };
 
+function open() {
+	return new Promise(function(resolve, reject) {
+		list().then((files) => {
+			showFilesList(files).then((button) => {
+				$("#drive").modal("hide");
+				const id = button.data("fileid");
+				const name = button.text();
 
-function authorize(code) {
+				read(authClient, id).then((data) => {
+					globals.saved = true;
+					globals.file.name = name;
+					globals.file.id = id;
+					document.title = globals.title + " - " + globals.file.name;
+					serializer.deserialize(JSON.parse(data));
+
+					initTinyMCE();
+					updateStyle();
+					loadViewer();
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+					resolve(data);
+				}).catch((err) => {
+					reject(err);
+				});
+			});
+		});
+	});
+}
+
+function requestToken() {
+	ipcRenderer.send('authorize');
+}
+
+ipcRenderer.on('token', function(event, message) {
+	settings.drive.token = message;
+	saveSettings().then(() => {
+		authorizeDrive(message).then(() => {
+			globals.drive.authorized = true;
+
+			if (authorizeCallback == "save") {
+				driveIO.writeFile();
+			}
+
+			if (authorizeCallback == "open") {
+				open().then(() => {
+					resolve();
+				}).catch((err) => {
+					reject(err);
+				});
+			}
+
+			authorizeCallback = null;
+		});
+	});
+});
+
+function list() {
+	return new Promise(function(resolve, reject) {
+		getFiles(authClient).then((data) => {
+			resolve(data);
+		}).catch((err) => {
+			reject(err);
+		});
+	});
+}
+
+function authorizeDrive(token) {
+	return new Promise(function(resolve, reject) {
+		_authorize(token).then((client) => {
+			createFolder(client).then(() => {
+				authClient = client;
+				resolve();
+			}).catch((err) => {
+				reject(err);
+			});
+		}).catch((err) => {
+			reject(err);
+		});
+	});
+}
+
+function _authorize(code) {
 	return new Promise(function(resolve) {
 		const clientSecret = 'k-YWdpaWFXX4xTiwWMf2oME9';
 		const clientId = '201706695524-djkbgve14lj7q789aoavb5rpjpruhtgc.apps.googleusercontent.com';
@@ -161,65 +265,57 @@ function createFolder(auth) {
 }
 
 function update(auth, fileName, content) {
-	const media = {
-		mimeType: 'text/json',
-		body: content
-	};
-	service.files.update({
-		auth: auth,
-		fileId: fileName,
-		media: media,
-		resource: fileMetadata,
-		addParents: [folder],
-		fields: 'id'
-	}, function(err, file) {
-		if (err) {
-			showNotification({
-				type: "alert-danger",
-				content: "Cannot save file! " + err
-			});
-		} else {
-			showNotification({
-				type: "alert-success",
-				content: "File saved!"
-			});
-			globals.currentFile = fileName + " (" + file.id + ")";
-			document.title = globals.title + " - " + globals.currentFile;
-			globals.saved = true;
-		}
+	return new Promise(function(resolve, reject) {
+		const media = {
+			mimeType: 'text/json',
+			body: content
+		};
+		service.files.update({
+			auth: auth,
+			fileId: fileName,
+			media: media,
+			addParents: [folder],
+			fields: 'id'
+		}, function(err, file) {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+				globals.file.id = file.id;
+				document.title = globals.title + " - " + globals.file.name;
+				globals.saved = true;
+			}
+		});
 	});
 }
 
 function newFile(auth, fileName, content) {
-	const media = {
-		mimeType: 'text/json',
-		body: content
-	};
-	const fileMetadata = {
-		'name': fileName,
-		'mimeType': 'text/json',
-		parents: [folder]
-	};
-	service.files.create({
-		auth: auth,
-		media: media,
-		resource: fileMetadata,
-		fields: 'id'
-	}, function(err, file) {
-		if (err) {
-			showNotification({
-				type: "alert-danger",
-				content: "Cannot save file! " + err
-			});
-		} else {
-			showNotification({
-				type: "alert-success",
-				content: "File saved!"
-			});
-			globals.currentFile = fileName + " (" + file.id + ")";
-			document.title = globals.title + " - " + globals.currentFile;
-			globals.saved = true;
-		}
+	return new Promise(function(resolve, reject) {
+		const media = {
+			mimeType: 'text/json',
+			body: content
+		};
+		const fileMetadata = {
+			'name': fileName,
+			'mimeType': 'text/json',
+			parents: [folder]
+		};
+		service.files.create({
+			auth: auth,
+			media: media,
+			resource: fileMetadata,
+			fields: 'id'
+		}, function(err, file) {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+				globals.file.name = fileName;
+				globals.file.id = file.id;
+				document.title = globals.title + " - " + globals.file.name;
+				globals.saved = true;
+			}
+		});
 	});
 }
 

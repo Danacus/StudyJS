@@ -62,8 +62,8 @@ function getIndex(x, array) {
 }
 
 $.fn.animateRotate = function(angle, duration, easing, complete) {
-	var args = $.speed(duration, easing, complete);
-	var step = args.step;
+	const args = $.speed(duration, easing, complete);
+	const step = args.step;
 	return this.each(function(i, e) {
 		args.complete = $.proxy(args.complete, e);
 		args.step = function(now) {

@@ -75,7 +75,24 @@ function showNotification(properties) {
 		}), 3000);
 }
 
+function showFilesList(files) {
+	return new Promise(function(resolve) {
+		$("#drive-list").children().remove();
+		files.forEach((file) => {
+			let item = $(`<li
+				class="list-group-item driveListItem"
+				data-fileid="${file.id}">${file.name}</li>`)
+				.appendTo($("#drive-list"));
+			item.click(function() {
+				resolve($(this));
+			});
+		});
+		$("#drive").modal("show");
+	});
+}
+
 export {
 	showDialog,
-	showNotification
+	showNotification,
+	showFilesList
 };

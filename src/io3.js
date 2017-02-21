@@ -15,6 +15,10 @@ import {
 } from './driveIO';
 
 import {
+	localIO
+} from './localIO';
+
+import {
 	showDialog,
 	showNotification
 } from './dialog';
@@ -34,6 +38,9 @@ import {
 } from './settings';
 
 var appRoot = getHomePath() + "/StudyJS";
+
+var services;
+
 
 var template = `
 	<!doctype html>
@@ -71,6 +78,10 @@ var saving = false,
 
 class AppIO {
 	constructor() {
+		services = {
+			Local: localIO,
+			GoogleDrive: driveIO
+		};
 		if (!fs.existsSync(appRoot + "/app/")) {
 			_downloadAssets(function() {
 				_load();
@@ -80,13 +91,19 @@ class AppIO {
 		}
 	}
 
-	save(file, drive = false) {
-		if (file) {
-			if (drive) {
-				driveIO.writeFile(globals.currentFile.split(/[()]/)[1], serializer.serialize());
-			} else {
-				_save(file, serializer.serialize());
-			}
+	save(service = globals.service) {
+		if (service) {
+			services[service].writeFile().then(() => {
+				showNotification({
+					type: "alert-success",
+					content: "File saved!"
+				});
+			}).catch((err) => {
+				showNotification({
+					type: "alert-danger",
+					content: "Cannot save file! " + err
+				});
+			});
 		} else {
 			showDialog({
 					title: "Save File",
@@ -98,11 +115,12 @@ class AppIO {
 					}]
 				})
 				.then((button) => {
-					if (button.label == "Local") {
-						_saveDialog();
-					} else if (button.label == "Google Drive") {
+					service = button.label.replace(/ /g, '');
+					globals.service = service;
+
+					if (!globals.name) {
 						showDialog({
-								title: "Save Remote File",
+								title: "Save File",
 								content: '<div class="form-group"><label for="usr">File Name:</label><input type="text" class="form-control" id="fileName"></div>',
 								buttons: [{
 									label: "Save",
@@ -110,12 +128,22 @@ class AppIO {
 								}]
 							})
 							.then((button) => {
-								if (!globals.authorized) {
-									saving = true;
-									ipcRenderer.send('authorize');
+								if ($("#fileName").val().endsWith(".json")) {
+									globals.file.name = $("#fileName").val();
 								} else {
-									_driveSave();
+									globals.file.name = $("#fileName").val() + ".json";
 								}
+								services[service].writeFile(true).then(() => {
+									showNotification({
+										type: "alert-success",
+										content: "File saved!"
+									});
+								}).catch((err) => {
+									showNotification({
+										type: "alert-danger",
+										content: "Cannot save file! " + err
+									});
+								});
 							});
 					}
 				});
@@ -133,22 +161,17 @@ class AppIO {
 				}]
 			})
 			.then((button) => {
-				if (button.label == "Local") {
-					_close(function() {
-						$("#dialog").modal("hide");
-						_open();
+				_close().then(() => {
+					globals.service = button.label.replace(/ /g, '');
+					services[globals.service].openFile().then(() => {
+
+					}).catch((err) => {
+						showNotification({
+							type: "alert-danger",
+							content: "Cannot open file! " + err
+						});
 					});
-				} else if (button.label == "Google Drive") {
-					_close(function() {
-						$("#dialog").modal("hide");
-						if (!globals.authorized) {
-							opening = true;
-							ipcRenderer.send('authorize');
-						} else {
-							_driveOpen();
-						}
-					});
-				}
+				});
 			});
 	}
 
@@ -161,8 +184,10 @@ class AppIO {
 				$(this).removeClass("mce-content-body mce-edit-focus");
 			});
 
-			globals.currentFile = null;
-			document.title = globals.title + " - " + (globals.currentFile || "New File");
+			globals.file.id = null;
+			globals.file.path = null;
+			globals.file.name = null;
+			document.title = globals.title + " - " + (globals.file.name || "New File");
 			initTinyMCE();
 			updateStyle();
 			loadViewer();
@@ -219,24 +244,6 @@ class AppIO {
 	}
 }
 
-ipcRenderer.on('token', function(event, message) {
-	settings.token = message;
-	saveSettings().then(() => {
-		driveIO.authorize(message).then(() => {
-			globals.authorized = true;
-
-			if (saving) {
-				_driveSave();
-				saving = false;
-			}
-
-			if (opening) {
-				_driveOpen();
-				opening = false;
-			}
-		});
-	});
-});
 
 function writeFile(path, content) {
 	return new Promise(function(resolve, reject) {
@@ -273,18 +280,7 @@ function readFile(file, callback) {
 function _load() {
 	_loadColors();
 	loadViewer();
-	loadSettings().then(() => {
-		if (settings.token) {
-			driveIO.authorize(settings.token).then(() => {
-				globals.authorized = true;
-			}).catch((err) => {
-				showNotification({
-					type: 'alert-warning',
-					content: err
-				})
-			});
-		}
-	});
+
 }
 
 function _importColor() {
@@ -385,97 +381,33 @@ function _copyAssets(target) {
 	});
 }
 
-function _driveOpen() {
-	driveIO.list().then((files) => {
-		$("#drive-list").children().remove();
-		files.forEach((file) => {
-			let item = $(`<li
-				class="list-group-item driveListItem"
-				data-fileid="${file.id}">${file.name}</li>`)
-				.appendTo($("#drive-list"));
-			item.click(function() {
-				$("#drive").modal("hide");
-				const id = $(this).data("fileid");
-				const name = $(this).text();
-				driveIO.openFile(id).then((data) => {
-					globals.currentFile = name + " (" + id + ")";
-					document.title = globals.title + " - " + globals.currentFile;
-					serializer.deserialize(JSON.parse(data));
-
-					initTinyMCE();
-					updateStyle();
-					loadViewer();
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-				});
-			});
-		});
-		$("#drive").modal("show");
-	});
-}
-
-function _driveSave() {
-	$(".eq-math").each(() => {
-		$(this).html($(this).data("formula"));
-	});
-
-	let filename;
-
-	if ($("#fileName").val().endsWith(".json")) {
-		filename = $("#fileName").val();
-	} else {
-		filename = $("#fileName").val() + ".json";
-	}
-
-	driveIO.writeNewFile(filename, serializer.serialize());
-
-	$("#dialog").modal("hide");
-}
-
-function _close(callback) {
-	if (!globals.saved) {
-		showDialog({
-			title: "Close without saving?",
-			content: "All changes since the last save will be lost.<br>Are you sure you want to continue?",
-			buttons: [{
-					label: "Yes",
-				},
-				{
-					label: "No",
-					type: "btn-primary",
+function _close() {
+	return new Promise(function(resolve, reject) {
+		if (!globals.saved) {
+			showDialog({
+				title: "Close without saving?",
+				content: "All changes since the last save will be lost.<br>Are you sure you want to continue?",
+				buttons: [{
+						label: "Yes",
+					},
+					{
+						label: "No",
+						type: "btn-primary",
+					}
+				]
+			}).then((button) => {
+				if (button.label == "Yes") {
+					$("#document").html("");
+					resolve();
+				} else {
+					reject();
+					return;
 				}
-			]
-		}).then((button) => {
-			if (button.label == "Yes") {
-				$("#document").html("");
-				callback();
-			} else {
-				return;
-			}
-		});
-	} else {
-		$("#document").html("");
-		callback();
-	}
-}
-
-function _open() {
-	dialog.showOpenDialog({
-		title: "Open File",
-		filters: [{
-			name: 'StudyJS XML Files',
-			extensions: ['xml', 'json']
-		}]
-	}, function(fileNames) {
-		readFile(fileNames[0]).then((data) => {
-			globals.currentFile = fileNames[0];
-			document.title = globals.projectTitle + " - " + globals.currentFile;
-			serializer.deserialize(JSON.parse(data));
-
-			initTinyMCE();
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-			updateStyle();
-			loadViewer();
-		})
+			});
+		} else {
+			$("#document").html("");
+			resolve();
+		}
 	});
 }
 
@@ -534,41 +466,6 @@ function _loadColors() {
 		showNotification({
 			type: "alert-danger",
 			content: "Cannot load colors! " + err
-		});
-	});
-}
-
-function _saveDialog() {
-	dialog.showSaveDialog({
-		title: "Save File",
-		filters: [{
-			name: 'StudyJS JSON Files',
-			extensions: ['json']
-		}]
-	}, function(fileName) {
-		if (fileName === undefined) {
-			return;
-		}
-		globals.currentFile = fileName;
-		_save(fileName, serializer.serialize());
-		$("#dialog").modal("hide");
-	});
-}
-
-function _save(file, content) {
-	$(".eq-math").each(() => {
-		$(this).html($(this).data("formula"));
-	});
-	writeFile(file, content).then(() => {
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-		console.log("Data written successfully!");
-		document.title = globals.title + " - " + globals.currentFile;
-		globals.saved = true;
-		updateStyle();
-
-		showNotification({
-			type: "alert-success",
-			content: "File saved!"
 		});
 	});
 }

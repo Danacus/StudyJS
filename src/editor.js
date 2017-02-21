@@ -64,6 +64,7 @@ class Editor {
 			initTinyMCE();
 			loadViewer();
 			tinymce.get(div.attr("id")).focus();
+			autoScroll(div);
 		});
 	}
 }

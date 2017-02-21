@@ -15,11 +15,14 @@ import {
 	MQEdit
 } from './eqEditor';
 import {
-	serializer
+	Serializer
 } from './serialize';
 import {
 	DriveIO
 } from './driveIO';
+import {
+	LocalIO
+} from './localIO';
 import {
 	loadSettings,
 	saveSettings,
@@ -33,10 +36,12 @@ var editor;
 var mqEdit;
 
 $(document).ready(function() {
+	new DriveIO();
+	new LocalIO();
 	appIO = new AppIO();
-	driveIO = new DriveIO();
 	editor = new Editor();
 	mqEdit = new MQEdit();
+	new Serializer();
 	initTinyMCE();
 });
 
@@ -45,7 +50,7 @@ $(document).keypress(function(e) {
 		e.which !== 0 && !e.ctrlKey && !e.metaKey && !e.altKey
 	) {
 		globals.saved = false;
-		document.title = globals.title + " - " + (globals.currentFile || "New File") + "*";
+		document.title = globals.title + " - " + (globals.file.name || "New File") + "*";
 	}
 });
 
@@ -84,23 +89,16 @@ listener.simple_combo("cmd left", function() {
 });
 
 listener.simple_combo("alt down", function() {
-	console.log("add body");
 	editor.addBody();
 });
 
 //IPC recievers
 ipcRenderer.on('save', function(event, message) {
-	var drive = true;
-
-	if ((globals.currentFile || ".json").endsWith(".json")) {
-		drive = false;
-	}
-
-	appIO.save(globals.currentFile, drive);
+	appIO.save();
 });
 
 ipcRenderer.on('saveas', function(event, message) {
-	appIO.save();
+	appIO.save(null);
 });
 
 ipcRenderer.on('open', function(event, message) {
@@ -116,18 +114,15 @@ ipcRenderer.on('export', function(event, message) {
 });
 
 ipcRenderer.on('logout', function(event, message) {
-	globals.authorized = false;
+	settings.drive.token = null;
+	saveSettings().then(() => {
+		globals.drive.authorized = false;
+	});
 });
 
 $(document).ready(function() {
 	$("#save").click(function() {
-		var drive = true;
-
-		if ((globals.currentFile || ".json").endsWith(".json")) {
-			drive = false;
-		}
-
-		appIO.save(globals.currentFile, drive);
+		appIO.save();
 	});
 
 	$("#open").click(function() {
