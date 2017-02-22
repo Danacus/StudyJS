@@ -8,7 +8,7 @@ import $ from 'jquery';
 import ncp from 'ncp';
 import {
 	serializer
-} from './serialize';
+} from '../serialize';
 
 import {
 	driveIO
@@ -21,7 +21,7 @@ import {
 import {
 	showDialog,
 	showNotification
-} from './dialog';
+} from '../../dialog';
 import {
 	EventEmitter
 } from 'events'
@@ -35,11 +35,11 @@ import {
 	loadSettings,
 	saveSettings,
 	settings
-} from './settings';
+} from '../../settings';
 
 import {
 	exportFile
-} from './export';
+} from '../export';
 
 var Promise = require('bluebird');
 var readFile = Promise.promisify(fs.readFile);
@@ -65,6 +65,14 @@ class AppIO {
 		} else {
 			_load();
 		}
+	}
+
+	static loadFile(data) {
+		serializer.deserialize(JSON.parse(data));
+		initTinyMCE();
+		updateStyle();
+		loadViewer();
+		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 	}
 
 	save(service = globals.service) {
@@ -96,34 +104,33 @@ class AppIO {
 					service = button.label.replace(/ /g, '');
 					globals.service = service;
 
-					if (!globals.file.name) {
-						showDialog({
-								title: "Save File",
-								content: '<div class="form-group"><label for="usr">File Name:</label><input type="text" class="form-control" id="fileName"></div>',
-								buttons: [{
-									label: "Save",
-									type: "btn-primary",
-								}]
-							})
-							.then((button) => {
-								if ($("#fileName").val().endsWith(".json")) {
-									globals.file.name = $("#fileName").val();
-								} else {
-									globals.file.name = $("#fileName").val() + ".json";
-								}
-								services[service].writeFile(true).then(() => {
-									showNotification({
-										type: "alert-success",
-										content: "File saved!"
-									});
-								}).catch((err) => {
-									showNotification({
-										type: "alert-danger",
-										content: "Cannot save file! " + err
-									});
+					showDialog({
+							title: "Save File",
+							content: `<div class="form-group"><label for="usr">File Name:</label><input type="text" class="form-control" id="fileName" value="${(globals.file.name || "")}"></div>`,
+							buttons: [{
+								label: "Save",
+								type: "btn-primary",
+							}]
+						})
+						.then((button) => {
+							if ($("#fileName").val().endsWith(".json")) {
+								globals.file.name = $("#fileName").val();
+							} else {
+								globals.file.name = $("#fileName").val() + ".json";
+							}
+							services[service].writeFile(true).then(() => {
+								showNotification({
+									type: "alert-success",
+									content: "File saved!"
+								});
+							}).catch((err) => {
+								showNotification({
+									type: "alert-danger",
+									content: "Cannot save file! " + err
 								});
 							});
-					}
+						});
+
 				});
 		}
 	}
@@ -232,9 +239,6 @@ function _newFile() {
 			$(this).removeClass("mce-content-body mce-edit-focus");
 		});
 
-		globals.file.id = null;
-		globals.file.path = null;
-		globals.file.name = null;
 		document.title = globals.title + " - " + (globals.file.name || "New File");
 		initTinyMCE();
 		updateStyle();
@@ -358,6 +362,9 @@ function _close() {
 			}).then((button) => {
 				if (button.label == "Yes") {
 					$("#document").html("");
+					globals.file.id = null;
+					globals.file.path = null;
+					globals.file.name = null;
 					resolve();
 				} else {
 					reject();

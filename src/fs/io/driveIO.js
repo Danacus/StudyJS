@@ -5,15 +5,18 @@ import {
 import {
 	showNotification,
 	showFilesList
-} from './dialog';
+} from '../../dialog';
 import {
 	serializer
-} from './serialize';
+} from '../serialize';
 import {
 	loadSettings,
 	saveSettings,
 	settings
-} from './settings';
+} from '../../settings';
+import {
+	AppIO
+} from './io3';
 
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
@@ -105,12 +108,7 @@ function open() {
 					globals.file.name = name;
 					globals.file.id = id;
 					document.title = globals.title + " - " + globals.file.name;
-					serializer.deserialize(JSON.parse(data));
-
-					initTinyMCE();
-					updateStyle();
-					loadViewer();
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+					AppIO.loadFile(data);
 					resolve(data);
 				}).catch((err) => {
 					reject(err);

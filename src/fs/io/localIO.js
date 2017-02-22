@@ -6,14 +6,16 @@ import {
 var dialog = remote.dialog;
 import {
 	showNotification
-} from './dialog';
+} from '../../dialog';
 import {
 	settings
-} from './settings';
+} from '../../settings';
 import {
 	serializer
-} from './serialize';
-
+} from '../serialize';
+import {
+	AppIO
+} from './io3';
 
 var getHomePath = require("home-path");
 var appRoot = getHomePath() + "/StudyJS";
@@ -73,12 +75,7 @@ function _open() {
 				globals.file.name = fileNames[0];
 				globals.file.path = fileNames[0];
 				document.title = globals.title + " - " + globals.file.name;
-				serializer.deserialize(JSON.parse(data));
-
-				initTinyMCE();
-				MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-				updateStyle();
-				loadViewer();
+				AppIO.loadFile(data);
 				resolve();
 			}).catch((err) => {
 				reject(err);
@@ -118,9 +115,7 @@ function _save(file, content) {
 		});
 		writeFile(file, content).then(() => {
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-			console.log("Data written successfully!");
 			document.title = globals.title + " - " + globals.file.name;
-
 			updateStyle();
 			resolve();
 		}).catch((err) => {

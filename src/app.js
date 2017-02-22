@@ -6,23 +6,23 @@ import {
 import $ from 'jquery';
 import {
 	Editor
-} from './editor';
+} from './editor/editor';
 import {
 	AppIO
-} from './io3';
+} from './fs/io/io3';
 import fs from 'fs';
 import {
 	MQEdit
-} from './eqEditor';
+} from './editor/eqEditor';
 import {
 	Serializer
-} from './serialize';
+} from './fs/serialize';
 import {
 	DriveIO
-} from './driveIO';
+} from './fs/io/driveIO';
 import {
 	LocalIO
-} from './localIO';
+} from './fs/io/localIO';
 import {
 	loadSettings,
 	saveSettings,
