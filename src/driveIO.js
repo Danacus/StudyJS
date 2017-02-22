@@ -115,7 +115,9 @@ function open() {
 				}).catch((err) => {
 					reject(err);
 				});
-			});
+			}).catch(() => {
+				reject("No file selected!");
+			});;
 		});
 	});
 }
@@ -135,10 +137,11 @@ ipcRenderer.on('token', function(event, message) {
 			}
 
 			if (authorizeCallback == "open") {
-				open().then(() => {
-					resolve();
-				}).catch((err) => {
-					reject(err);
+				open().catch((err) => {
+					showNotification({
+						type: "alert-danger",
+						content: "Cannot export file! " + err
+					});
 				});
 			}
 

@@ -37,41 +37,17 @@ import {
 	settings
 } from './settings';
 
+import {
+	exportFile
+} from './export';
+
+var Promise = require('bluebird');
+var readFile = Promise.promisify(fs.readFile);
+var writeFile = Promise.promisify(fs.writeFile);
+
 var appRoot = getHomePath() + "/StudyJS";
 
 var services;
-
-
-var template = `
-	<!doctype html>
-	<html>
-
-	<head>
-	    <meta charset="utf-8">
-	    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	    <title>StudyJS</title>
-	    <link href="css/main.css" rel="stylesheet" type="text/css">
-			<link rel="stylesheet" href="css/bootstrap.min.css">
-	    <body>
-	        <script src="js/jquery-3.1.1.min.js"></script>
-	        <script>
-	            window.jQuery = window.$;
-	            $(document).ready(function() {
-	                loadViewer();
-	            });
-	        </script>
-	        <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 100 } }); </script>
-	        <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
-	        </script>
-	        <script src="js/bootstrap.min.js"></script>
-	        <script src="js/viewer.js"></script>
-	        <div id="document">
-	            <!--replaceme-->
-	        </div>
-	    </body>
-
-	</html>
-`;
 
 var saving = false,
 	opening = false;
@@ -103,6 +79,8 @@ class AppIO {
 					type: "alert-danger",
 					content: "Cannot save file! " + err
 				});
+				globals.service = null;
+				this.save();
 			});
 		} else {
 			showDialog({
@@ -118,7 +96,7 @@ class AppIO {
 					service = button.label.replace(/ /g, '');
 					globals.service = service;
 
-					if (!globals.name) {
+					if (!globals.file.name) {
 						showDialog({
 								title: "Save File",
 								content: '<div class="form-group"><label for="usr">File Name:</label><input type="text" class="form-control" id="fileName"></div>',
@@ -170,32 +148,18 @@ class AppIO {
 							type: "alert-danger",
 							content: "Cannot open file! " + err
 						});
+						_newFile();
 					});
 				});
 			});
 	}
 
 	newFile() {
-		_close(function() {
-			$("#document").html("<div data-type='container' data-depth='0'><div class='panel panel-default'><div class='panel-heading' data-type='editable'></div></div></div>");
-
-			$("#document").find('*').each(function() {
-				$(this).removeAttr("id spellcheck contenteditable");
-				$(this).removeClass("mce-content-body mce-edit-focus");
-			});
-
-			globals.file.id = null;
-			globals.file.path = null;
-			globals.file.name = null;
-			document.title = globals.title + " - " + (globals.file.name || "New File");
-			initTinyMCE();
-			updateStyle();
-			loadViewer();
-		});
+		_newFile();
 	}
 
 	exportFile() {
-		const file = _exportDocument();
+		const file = exportFile();
 
 		dialog.showSaveDialog({
 			title: "Export",
@@ -213,8 +177,23 @@ class AppIO {
 							folderPaths.split("/")[folderPaths.split("/").length - 1],
 							""
 						)
-					);
-				});
+					).then(() => {
+						showNotification({
+							type: "alert-success",
+							content: "File Exported!"
+						});
+					}).catch((err) => {
+						showNotification({
+							type: "alert-danger",
+							content: "Cannot export file! " + err
+						});
+					});
+				}).catch((err) => {
+					showNotification({
+						type: "alert-danger",
+						content: "Cannot export file! " + err
+					});
+				});;
 			}
 		});
 	}
@@ -244,43 +223,28 @@ class AppIO {
 	}
 }
 
+function _newFile() {
+	_close().then(() => {
+		$("#document").html("<div data-type='container' data-depth='0'><div class='panel panel-default'><div class='panel-heading' data-type='editable'></div></div></div>");
 
-function writeFile(path, content) {
-	return new Promise(function(resolve, reject) {
-		fs.writeFile(path, content, function(err) {
-			if (err) {
-				showNotification({
-					type: "alert-danger",
-					content: "Cannot write file! " + err
-				});
-				reject();
-				return console.error(err);
-			}
-			resolve();
+		$("#document").find('*').each(function() {
+			$(this).removeAttr("id spellcheck contenteditable");
+			$(this).removeClass("mce-content-body mce-edit-focus");
 		});
-	});
-}
 
-function readFile(file, callback) {
-	return new Promise(function(resolve, reject) {
-		fs.readFile(file, function(err, data) {
-			if (err) {
-				showNotification({
-					type: "alert-danger",
-					content: "Cannot open file! " + err
-				});
-				reject();
-				return console.error(err);
-			}
-			resolve(data);
-		});
+		globals.file.id = null;
+		globals.file.path = null;
+		globals.file.name = null;
+		document.title = globals.title + " - " + (globals.file.name || "New File");
+		initTinyMCE();
+		updateStyle();
+		loadViewer();
 	});
 }
 
 function _load() {
 	_loadColors();
 	loadViewer();
-
 }
 
 function _importColor() {
@@ -365,19 +329,15 @@ function _exportDocument() {
 }
 
 function _copyAssets(target) {
-	ncp(appRoot + "/app/dist", target, function(err) {
-		if (err) {
-			showNotification({
-				type: "alert-danger",
-				content: "Cannot export file! " + err
-			});
-			return console.error(err);
-		}
-		showNotification({
-			type: "alert-success",
-			content: "File exported!"
+	return new Promise(function(resolve, reject) {
+		ncp(appRoot + "/app/dist", target, function(err) {
+			if (err) {
+				reject();
+				return console.error(err);
+			}
+			resolve();
+			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 		});
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 	});
 }
 

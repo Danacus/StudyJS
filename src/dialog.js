@@ -19,7 +19,7 @@ function showDialog(properties) {
 						</div>
 				</div>
 			`
-		);
+		).appendTo(document.body);
 
 		dialog.find(".modal-title").text(properties.title || "Dialog");
 		dialog.find(".modal-body").html(properties.content || "");
@@ -76,8 +76,11 @@ function showNotification(properties) {
 }
 
 function showFilesList(files) {
-	return new Promise(function(resolve) {
+	return new Promise(function(resolve, reject) {
 		$("#drive-list").children().remove();
+		$("#drive").bind("hidden.bs.modal", function() {
+			reject();
+		});
 		files.forEach((file) => {
 			let item = $(`<li
 				class="list-group-item driveListItem"

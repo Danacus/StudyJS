@@ -60,10 +60,15 @@ function _open() {
 		dialog.showOpenDialog({
 			title: "Open File",
 			filters: [{
-				name: 'StudyJS XML Files',
-				extensions: ['xml', 'json']
+				name: 'StudyJS JSON Files',
+				extensions: ['json']
 			}]
 		}, function(fileNames) {
+			if (!fileNames || fileNames.length == 0) {
+				reject("No file selected!");
+				return;
+			}
+
 			readFile(fileNames[0], "utf-8").then((data) => {
 				globals.file.name = fileNames[0];
 				globals.file.path = fileNames[0];
