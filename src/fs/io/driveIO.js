@@ -23,7 +23,6 @@ var googleAuth = require('google-auth-library');
 var getHomePath = require('home-path');
 var appRoot = getHomePath() + "/StudyJS";
 
-var folder;
 var authClient;
 
 var authorizeCallback;
@@ -50,27 +49,17 @@ class DriveIO {
 		});
 	}
 	writeFile(createNew) {
-		return new Promise(function(resolve, reject) {
-			if (!globals.drive.authorized) {
-				authorizeCallback = "save";
-				requestToken();
-				return;
-			}
+		if (!globals.drive.authorized) {
+			authorizeCallback = "save";
+			requestToken();
+			return;
+		}
 
-			if (!createNew) {
-				update(authClient, globals.file.id, serializer.serialize()).then(() => {
-					resolve();
-				}).catch((err) => {
-					reject(err);
-				});
-			} else {
-				newFile(authClient, globals.file.name, serializer.serialize()).then(() => {
-					resolve();
-				}).catch((err) => {
-					reject(err);
-				});
-			}
-		});
+		if (!createNew) {
+			return update(authClient, globals.file.id, serializer.serialize());
+		} else {
+			return newFile(authClient, globals.file.subject, globals.file.name, serializer.serialize());
+		}
 	}
 	openFile() {
 		return new Promise(function(resolve, reject) {
@@ -87,7 +76,6 @@ class DriveIO {
 			});
 		});
 	}
-
 }
 
 export {
@@ -98,16 +86,31 @@ export {
 function open() {
 	return new Promise(function(resolve, reject) {
 		list().then((files) => {
-			showFilesList(files).then((button) => {
+			let fileList = [];
+
+			files.forEach((file) => {
+				if (file.name.includes("-")) {
+					let name = file.name;
+					fileList.push({
+						name: name.split("-")[1].trim(),
+						id: file.id,
+						subject: name.split("-")[0].trim()
+					});
+				}
+			});
+
+			showFilesList(fileList).then((button) => {
 				$("#drive").modal("hide");
 				const id = button.data("fileid");
-				const name = button.text();
+				const name = button.data("filename");
+				const subject = button.data("filesubject");
 
 				read(authClient, id).then((data) => {
 					globals.saved = true;
 					globals.file.name = name;
 					globals.file.id = id;
-					document.title = globals.title + " - " + globals.file.name;
+					globals.file.subject = subject;
+					document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 					AppIO.loadFile(data);
 					resolve(data);
 				}).catch((err) => {
@@ -115,7 +118,7 @@ function open() {
 				});
 			}).catch(() => {
 				reject("No file selected!");
-			});;
+			});
 		});
 	});
 }
@@ -148,6 +151,25 @@ ipcRenderer.on('token', function(event, message) {
 	});
 });
 
+function getName(auth, id) {
+	return new Promise(function(resolve, reject) {
+		service.files.get({
+			auth: auth,
+			fileId: id
+		}, function(err, response) {
+			if (err) {
+				reject(err);
+				return;
+			}
+			if (!response) {
+				reject("File not found!");
+			} else {
+				resolve(response.name);
+			}
+		});
+	});
+}
+
 function list() {
 	return new Promise(function(resolve, reject) {
 		getFiles(authClient).then((data) => {
@@ -161,20 +183,17 @@ function list() {
 function authorizeDrive(token) {
 	return new Promise(function(resolve, reject) {
 		_authorize(token).then((client) => {
-			createFolder(client).then(() => {
-				authClient = client;
-				resolve();
-			}).catch((err) => {
-				reject(err);
-			});
+			authClient = client;
+			resolve();
 		}).catch((err) => {
+			requestToken();
 			reject(err);
 		});
 	});
 }
 
 function _authorize(code) {
-	return new Promise(function(resolve) {
+	return new Promise(function(resolve, reject) {
 		const clientSecret = 'k-YWdpaWFXX4xTiwWMf2oME9';
 		const clientId = '201706695524-djkbgve14lj7q789aoavb5rpjpruhtgc.apps.googleusercontent.com';
 		const redirectUrl = 'http://localhost';
@@ -182,16 +201,31 @@ function _authorize(code) {
 		const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
 		oauth2Client.credentials.access_token = code;
-		resolve(oauth2Client);
+		service.files.list({
+			auth: oauth2Client,
+			fields: "nextPageToken, files(id, name)"
+		}, function(err, response) {
+			if (err) {
+				reject(err);
+				return;
+			}
+
+			resolve(oauth2Client);
+		});
 	});
 }
 
-function getFolder(auth) {
+function getFolder(auth, name, parent = null) {
 	return new Promise(function(resolve, reject) {
 		var id = null;
 		service.files.list({
 			auth: auth,
 			mimeType: 'application/vnd.google-apps.folder',
+			q: (function() {
+				if (parent) {
+					return "'" + parent + "' in parents"
+				}
+			})(),
 			fields: "nextPageToken, files(id, name)"
 		}, function(err, response) {
 			if (err) {
@@ -203,11 +237,20 @@ function getFolder(auth) {
 				reject("No files found!");
 			} else {
 				files.forEach((file) => {
-					if (file.name == "StudyJS") {
+					if (file.name == name) {
 						id = file.id;
 					}
 				});
-				resolve(id);
+
+				if (id) {
+					resolve(id);
+				} else {
+					createFolder(auth, name, parent).then((id) => {
+						resolve(id);
+					}).catch((err) => {
+						reject(err);
+					});
+				}
 			}
 		});
 	});
@@ -215,52 +258,62 @@ function getFolder(auth) {
 
 function getFiles(auth) {
 	return new Promise(function(resolve, reject) {
-		service.files.list({
-			auth: auth,
-			parents: [folder],
-			mimeType: "application/json",
-			fields: "nextPageToken, files(id, name)"
-		}, function(err, response) {
-			if (err) {
-				reject(err);
-				return;
-			}
-			var files = response.files;
-			if (files.length == 0) {
-				reject("No files found!");
-			} else {
-				resolve(files);
-			}
+		var files = [];
+		getFolder(auth, "StudyJS - Files").then((f) => {
+			service.files.list({
+				auth: auth,
+				q: "mimeType='application/vnd.google-apps.folder' and '" + f + "' in parents",
+				fields: "nextPageToken, files(id, name, parents)"
+			}, function(err, resp) {
+				if (err) {
+					reject(err);
+					return;
+				}
+
+				console.log(resp.files.length);
+
+				resp.files.forEach((folder, index) => {
+					service.files.list({
+						auth: auth,
+						q: "mimeType='text/json' and '" + folder.id + "' in parents",
+						fields: "nextPageToken, files(id, name, parents)"
+					}, function(err, response) {
+						if (err) {
+							reject(err);
+							return;
+						}
+
+						response.files.forEach((file) => {
+							files.push(file);
+						});
+
+						if (index == resp.files.length - 1) {
+							resolve(files);
+						}
+					});
+				});
+			});
 		});
 	});
 }
 
-function createFolder(auth) {
+function createFolder(auth, name, parent = null) {
 	return new Promise(function(resolve, reject) {
-		getFolder(auth).then((id) => {
-			if (id == null) {
-				const fileMetadata = {
-					'name': 'StudyJS',
-					'mimeType': 'application/vnd.google-apps.folder'
-				};
-				service.files.create({
-					auth: auth,
-					resource: fileMetadata,
-					fields: 'id'
-				}, function(err, file) {
-					if (err) {
-						reject(err);
-					} else {
-						folder = file.id;
-						resolve();
-					}
-				});
+		const fileMetadata = {
+			'name': name,
+			'mimeType': 'application/vnd.google-apps.folder',
+			parents: [parent]
+		};
+		service.files.create({
+			auth: auth,
+			resource: fileMetadata,
+			fields: 'id'
+		}, function(err, file) {
+			if (err) {
+				reject(err);
 			} else {
-				folder = id;
-				resolve();
+				resolve(file.id);
 			}
-		}).catch((err) => {
-			reject(err);
 		});
 	});
 }
@@ -275,7 +328,6 @@ function update(auth, fileName, content) {
 			auth: auth,
 			fileId: fileName,
 			media: media,
-			addParents: [folder],
 			fields: 'id'
 		}, function(err, file) {
 			if (err) {
@@ -283,39 +335,43 @@ function update(auth, fileName, content) {
 			} else {
 				resolve();
 				globals.file.id = file.id;
-				document.title = globals.title + " - " + globals.file.name;
+				document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 				globals.saved = true;
 			}
 		});
 	});
 }
 
-function newFile(auth, fileName, content) {
+function newFile(auth, subject, fileName, content) {
 	return new Promise(function(resolve, reject) {
-		const media = {
-			mimeType: 'text/json',
-			body: content
-		};
-		const fileMetadata = {
-			'name': fileName,
-			'mimeType': 'text/json',
-			parents: [folder]
-		};
-		service.files.create({
-			auth: auth,
-			media: media,
-			resource: fileMetadata,
-			fields: 'id'
-		}, function(err, file) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve();
-				globals.file.name = fileName;
-				globals.file.id = file.id;
-				document.title = globals.title + " - " + globals.file.name;
-				globals.saved = true;
-			}
+		getFolder(auth, "StudyJS - Files").then((f) => {
+			getFolder(auth, subject, f).then((fol) => {
+				const media = {
+					mimeType: 'text/json',
+					body: content
+				};
+				const fileMetadata = {
+					'name': subject + " - " + fileName,
+					'mimeType': 'text/json',
+					parents: [fol]
+				};
+				service.files.create({
+					auth: auth,
+					media: media,
+					resource: fileMetadata,
+					fields: 'id'
+				}, function(err, file) {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+						globals.file.name = fileName;
+						globals.file.id = file.id;
+						document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
+						globals.saved = true;
+					}
+				});
+			});
 		});
 	});
 }

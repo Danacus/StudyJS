@@ -20,7 +20,8 @@ import {
 
 import {
 	showDialog,
-	showNotification
+	showNotification,
+	showFilesList
 } from '../../dialog';
 import {
 	EventEmitter
@@ -106,7 +107,13 @@ class AppIO {
 
 					showDialog({
 							title: "Save File",
-							content: `<div class="form-group"><label for="usr">File Name:</label><input type="text" class="form-control" id="fileName" value="${(globals.file.name || "")}"></div>`,
+							content: `
+							<div class="form-group">
+								<label for="usr">Subject:</label>
+								<input type="text" class="form-control" id="fileSubject" value="${(globals.file.subject || "")}">
+								<label for="usr">File Name:</label>
+								<input type="text" class="form-control" id="fileName" value="${(globals.file.name || "")}">
+							</div>`,
 							buttons: [{
 								label: "Save",
 								type: "btn-primary",
@@ -118,6 +125,8 @@ class AppIO {
 							} else {
 								globals.file.name = $("#fileName").val() + ".json";
 							}
+							globals.file.subject = $("#fileSubject").val().toLowerCase().capitalizeFirstLetter();
+
 							services[service].writeFile(true).then(() => {
 								showNotification({
 									type: "alert-success",
@@ -168,41 +177,27 @@ class AppIO {
 	exportFile() {
 		const file = exportFile();
 
-		dialog.showSaveDialog({
-			title: "Export",
-			filters: [{
-				name: 'Web Page',
-				extensions: ['html']
-			}]
-		}, function(folderPaths) {
-			if (folderPaths === undefined) {
-				return;
-			} else {
-				writeFile(folderPaths, file).then(() => {
-					_copyAssets(
-						folderPaths.replace(
-							folderPaths.split("/")[folderPaths.split("/").length - 1],
-							""
-						)
-					).then(() => {
-						showNotification({
-							type: "alert-success",
-							content: "File Exported!"
-						});
-					}).catch((err) => {
-						showNotification({
-							type: "alert-danger",
-							content: "Cannot export file! " + err
-						});
-					});
-				}).catch((err) => {
-					showNotification({
-						type: "alert-danger",
-						content: "Cannot export file! " + err
-					});
-				});;
-			}
-		});
+		const dir = settings.folder + "/" + globals.file.subject;
+
+		writeFile(dir + "/" + globals.file.name.replace(".json", ".html"), file).then(() => {
+			_copyAssets(dir).then(() => {
+				showNotification({
+					type: "alert-success",
+					content: "File Exported!"
+				});
+			}).catch((err) => {
+				showNotification({
+					type: "alert-danger",
+					content: "Cannot export file! " + err
+				});
+			});
+		}).catch((err) => {
+			showNotification({
+				type: "alert-danger",
+				content: "Cannot export file! " + err
+			});
+		});;
+
 	}
 
 	addColor() {
@@ -467,6 +462,9 @@ String.prototype.unCamelCase = function() {
 	})
 }
 
+String.prototype.capitalizeFirstLetter = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+}
 
 export {
 	AppIO

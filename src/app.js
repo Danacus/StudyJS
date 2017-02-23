@@ -50,7 +50,7 @@ $(document).keypress(function(e) {
 		e.which !== 0 && !e.ctrlKey && !e.metaKey && !e.altKey
 	) {
 		globals.saved = false;
-		document.title = globals.title + " - " + (globals.file.name || "New File") + "*";
+		document.title = globals.title + " - " + (globals.file.subject || "") + " - " + (globals.file.name || "New File") + "*";
 	}
 });
 

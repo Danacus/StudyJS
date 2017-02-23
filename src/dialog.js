@@ -19,7 +19,7 @@ function showDialog(properties) {
 						</div>
 				</div>
 			`
-		).appendTo(document.body);
+		);
 
 		dialog.find(".modal-title").text(properties.title || "Dialog");
 		dialog.find(".modal-body").html(properties.content || "");
@@ -42,6 +42,7 @@ function showDialog(properties) {
 		});
 	});
 }
+
 
 function showNotification(properties) {
 	var notification = $(
@@ -75,8 +76,28 @@ function showNotification(properties) {
 		}), 3000);
 }
 
+var sort_by = function(field, reverse, primer) {
+
+	var key = primer ?
+		function(x) {
+			return primer(x[field])
+		} :
+		function(x) {
+			return x[field]
+		};
+
+	reverse = !reverse ? 1 : -1;
+
+	return function(a, b) {
+		return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+	}
+}
+
 function showFilesList(files) {
 	return new Promise(function(resolve, reject) {
+		files.sort(sort_by('subject', false, function(a) {
+			return a.toUpperCase()
+		}));
 		$("#drive-list").children().remove();
 		$("#drive").bind("hidden.bs.modal", function() {
 			reject();
@@ -84,7 +105,14 @@ function showFilesList(files) {
 		files.forEach((file) => {
 			let item = $(`<li
 				class="list-group-item driveListItem"
-				data-fileid="${file.id}">${file.name}</li>`)
+				data-fileid="${(file.id || "")}"
+				data-filepath="${(file.path || "")}"
+				data-filesubject="${(file.subject || "")}"
+				data-filename="${(file.name || "")}">
+				<div class="row">
+                <div class="col-md-4"><label>${(file.subject || "")}</label></div>
+                <div class="col-md-4">${(file.name || "").replace(".json", "")}</div>
+              </div></li>`)
 				.appendTo($("#drive-list"));
 			item.click(function() {
 				resolve($(this));

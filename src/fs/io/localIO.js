@@ -1,14 +1,21 @@
 import fs from 'fs';
+var readdirp = require('readdirp'),
+	path = require('path'),
+	es = require('event-stream');
+
 import {
 	remote,
 	ipcRenderer
 } from 'electron';
 var dialog = remote.dialog;
 import {
-	showNotification
+	showNotification,
+	showFilesList
 } from '../../dialog';
 import {
-	settings
+	settings,
+	loadSettings,
+	saveSettings
 } from '../../settings';
 import {
 	serializer
@@ -30,16 +37,29 @@ var localIO;
 class LocalIO {
 	constructor() {
 		localIO = this;
+
+		loadSettings();
 	}
 	writeFile(createNew = false) {
 		return new Promise(function(resolve, reject) {
-			if (createNew) {
-				globals.file.path = null;
-			}
+			_checkFolder().then(() => {
+				if (createNew) {
+					globals.file.path = null;
+				}
 
-			_saveDialog().then(() => {
-				globals.saved = true;
-				resolve();
+				let dir = settings.folder + "/" + globals.file.subject + "/";
+
+				if (!fs.existsSync(dir)) {
+					fs.mkdirSync(dir);
+				}
+
+				_save(dir + globals.file.name, serializer.serialize()).then(() => {
+					$("#dialog").modal("hide");
+					globals.saved = true;
+					resolve();
+				}).catch((err) => {
+					reject(err);
+				});
 			}).catch((err) => {
 				reject(err);
 			});
@@ -47,11 +67,13 @@ class LocalIO {
 	}
 	openFile() {
 		return new Promise(function(resolve, reject) {
-			_open().then((data) => {
-				globals.saved = true;
-				resolve(data);
-			}).catch((err) => {
-				reject(err);
+			_checkFolder().then(() => {
+				_open().then((data) => {
+					globals.saved = true;
+					resolve(data);
+				}).catch((err) => {
+					reject(err);
+				});
 			});
 		});
 	}
@@ -59,28 +81,50 @@ class LocalIO {
 
 function _open() {
 	return new Promise(function(resolve, reject) {
-		dialog.showOpenDialog({
-			title: "Open File",
-			filters: [{
-				name: 'StudyJS JSON Files',
-				extensions: ['json']
-			}]
-		}, function(fileNames) {
-			if (!fileNames || fileNames.length == 0) {
-				reject("No file selected!");
-				return;
-			}
 
-			readFile(fileNames[0], "utf-8").then((data) => {
-				globals.file.name = fileNames[0];
-				globals.file.path = fileNames[0];
-				document.title = globals.title + " - " + globals.file.name;
-				AppIO.loadFile(data);
-				resolve();
-			}).catch((err) => {
-				reject(err);
-			});
+		let files = [];
+
+		var stream = readdirp({
+			root: settings.folder,
+			fileFilter: '*.json'
 		});
+		stream
+			.on('warn', function(err) {
+				reject(err);
+				// optionally call stream.destroy() here in order to abort and cause 'close' to be emitted
+			})
+			.on('error', function(err) {
+				reject(err);
+			})
+			.pipe(es.mapSync(function(entry) {
+				files.push({
+					name: entry.name,
+					path: entry.fullPath,
+					subject: path.dirname(entry.path).split("/")[path.dirname(entry.path).split("/").length - 1]
+				});
+
+				showFilesList(files).then((button) => {
+					const name = button.data("filename");
+					const subject = button.data("filesubject");
+					const path = button.data("filepath");
+					console.log(button);
+					console.log(path);
+					readFile(path, "utf-8").then((data) => {
+						globals.file.name = name;
+						globals.file.path = path;
+						globals.file.subject = subject;
+						document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
+						AppIO.loadFile(data);
+						$("#drive").modal("hide");
+						resolve();
+					}).catch((err) => {
+						reject(err);
+					});
+				}).catch(() => {
+					reject("No file selected!");
+				});
+			})).pipe(es.stringify())
+			.pipe(process.stdout);
 	});
 }
 
@@ -115,11 +159,37 @@ function _save(file, content) {
 		});
 		writeFile(file, content).then(() => {
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-			document.title = globals.title + " - " + globals.file.name;
+			document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 			updateStyle();
 			resolve();
 		}).catch((err) => {
 			reject(err);
+		});
+	});
+}
+
+function _checkFolder() {
+	return new Promise(function(resolve, reject) {
+		if (settings.folder) {
+			resolve();
+			return;
+		}
+
+		dialog.showOpenDialog({
+			title: "Select Default Folder",
+			properties: ['openDirectory']
+		}, function(folders) {
+			if (folders === undefined) {
+				reject("No folder selected!");
+				return;
+			}
+			settings.folder = folders[0];
+
+			saveSettings().then(() => {
+				resolve();
+			}).catch((err) => {
+				reject(err);
+			})
 		});
 	});
 }
