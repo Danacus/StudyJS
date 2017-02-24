@@ -80,6 +80,9 @@
                 <li><a href="#" id="export"><span class="glyphicon glyphicon-export"></span></a></li>
                 <li><a href="#" id="eqedit" data-toggle="modal" data-target="#eq-editor">f(x)</a></li>
                 <li>
+                    <a href="#" id="settings-button"><span class="glyphicon glyphicon-cog"></span></a>
+                </li>
+                <li>
                     <div class="dropdown" style="margin-top: 3px">
                         <button class="btn dropdown-toggle" type="button" data-toggle="dropdown">Colors
                           <span class="caret"></span></button>
@@ -138,6 +141,62 @@
         </div>
     </div>
 
+    <div class="modal loading fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="settings-dialog" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Settings</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-3 col-md-6 col-lg-4" class="settings-sidebar">
+                        <ul class="list-group">
+                            <li class="list-group-item settings-page active" data-target="general">General</li>
+                            <li class="list-group-item settings-page" data-target="storage">Storage</li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-9 col-md-6 col-lg-8" class="settings-content">
+                        <div class="page general active">
+                            <h4><strong>General Settings</strong></h4>
+                        </div>
+                        <div class="page storage">
+                            <h4><strong>Storage Settings</strong></h4>
+                            <br>
+                            <h4><strong>Local</strong></h4>
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <label for="local-path">Default path:</label>
+                                    <input type="local-path" class="form-control settings-input" data-setting="local.folder">
+                                    <a href="#" class="setFolder"><span class="glyphicon glyphicon-folder-open"></span></a>
+                                </div>
+                            </form>
+                            <h4><strong>Drive</strong></h4>
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <label for="local-path">Default folder:</label>
+                                    <input type="local-path" class="form-control settings-input" data-setting="drive.folder">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary apply" data-dismiss="modal">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="document">
         <div data-type='container' data-depth='0'>
             <div class="panel panel-default">
@@ -145,5 +204,6 @@
             </div>
         </div>
     </div>
+
 
 </html>

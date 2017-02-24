@@ -24,6 +24,23 @@ a {
   position: absolute;
   overflow-y: visible;
 }
+.loader {
+  border: 8px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 8px solid #777777;
+  margin: auto;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 .nav > li > a:hover > span,
 .nav > li > a:focus > span,
 .nav > li > a > span {
@@ -55,6 +72,9 @@ a:focus {
 .driveListItem:hover {
   cursor: pointer;
 }
+.settings-page:hover {
+  cursor: pointer;
+}
 div[data-depth='0'] > div.panel > div.panel-heading > p:first-child {
   font-size: 150%;
   font-weight: bolder;
@@ -82,4 +102,13 @@ ul {
   margin-left: 0px;
   overflow-y: auto;
   max-height: 600px !important;
+}
+#settings-dialog .modal-body {
+  min-height: 400px;
+}
+#settings-dialog .page {
+  display: none;
+}
+#settings-dialog .page.active {
+  display: inherit !important;
 }

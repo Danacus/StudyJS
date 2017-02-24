@@ -15,7 +15,8 @@ import {
 	settings
 } from '../../settings';
 import {
-	AppIO
+	AppIO,
+	appIO
 } from './io3';
 
 var google = require('googleapis');
@@ -63,6 +64,8 @@ class DriveIO {
 	}
 	openFile() {
 		return new Promise(function(resolve, reject) {
+			$(".loading").modal("show");
+
 			if (!globals.drive.authorized) {
 				authorizeCallback = "open";
 				requestToken();
@@ -86,6 +89,7 @@ export {
 function open() {
 	return new Promise(function(resolve, reject) {
 		list().then((files) => {
+			console.log(files);
 			let fileList = [];
 
 			files.forEach((file) => {
@@ -98,6 +102,8 @@ function open() {
 					});
 				}
 			});
+
+			$(".loading").modal("hide");
 
 			showFilesList(fileList).then((button) => {
 				$("#drive").modal("hide");
@@ -119,6 +125,8 @@ function open() {
 			}).catch(() => {
 				reject("No file selected!");
 			});
+		}).catch((err) => {
+			reject(err);
 		});
 	});
 }
@@ -141,8 +149,9 @@ ipcRenderer.on('token', function(event, message) {
 				open().catch((err) => {
 					showNotification({
 						type: "alert-danger",
-						content: "Cannot export file! " + err
+						content: "Cannot open file! " + err
 					});
+					appIO.newFile();
 				});
 			}
 
@@ -242,9 +251,12 @@ function getFolder(auth, name, parent = null) {
 					}
 				});
 
+				console.log(id);
+
 				if (id) {
 					resolve(id);
 				} else {
+					console.log("Create folder");
 					createFolder(auth, name, parent).then((id) => {
 						resolve(id);
 					}).catch((err) => {
@@ -259,7 +271,7 @@ function getFolder(auth, name, parent = null) {
 function getFiles(auth) {
 	return new Promise(function(resolve, reject) {
 		var files = [];
-		getFolder(auth, "StudyJS - Files").then((f) => {
+		getFolder(auth, settings.drive.folder).then((f) => {
 			service.files.list({
 				auth: auth,
 				q: "mimeType='application/vnd.google-apps.folder' and '" + f + "' in parents",
@@ -271,6 +283,11 @@ function getFiles(auth) {
 				}
 
 				console.log(resp.files.length);
+
+				if (resp.files.length == 0) {
+					$(".loading").modal("hide");
+					reject("Folder is empty!");
+				}
 
 				resp.files.forEach((folder, index) => {
 					service.files.list({
@@ -293,16 +310,23 @@ function getFiles(auth) {
 					});
 				});
 			});
+		}).catch((err) => {
+			reject(err);
 		});
 	});
 }
 
 function createFolder(auth, name, parent = null) {
 	return new Promise(function(resolve, reject) {
+		console.log(parent);
 		const fileMetadata = {
 			'name': name,
 			'mimeType': 'application/vnd.google-apps.folder',
-			parents: [parent]
+			parents: (function() {
+				if (parent) {
+					return [parent]
+				}
+			})()
 		};
 		service.files.create({
 			auth: auth,
@@ -344,7 +368,7 @@ function update(auth, fileName, content) {
 
 function newFile(auth, subject, fileName, content) {
 	return new Promise(function(resolve, reject) {
-		getFolder(auth, "StudyJS - Files").then((f) => {
+		getFolder(auth, settings.drive.folder).then((f) => {
 			getFolder(auth, subject, f).then((fol) => {
 				const media = {
 					mimeType: 'text/json',

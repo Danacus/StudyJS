@@ -49,12 +49,14 @@ var writeFile = Promise.promisify(fs.writeFile);
 var appRoot = getHomePath() + "/StudyJS";
 
 var services;
+var appIO;
 
 var saving = false,
 	opening = false;
 
 class AppIO {
 	constructor() {
+		appIO = this;
 		services = {
 			Local: localIO,
 			GoogleDrive: driveIO
@@ -177,7 +179,7 @@ class AppIO {
 	exportFile() {
 		const file = exportFile();
 
-		const dir = settings.folder + "/" + globals.file.subject;
+		const dir = settings.local.folder + "/" + globals.file.subject;
 
 		writeFile(dir + "/" + globals.file.name.replace(".json", ".html"), file).then(() => {
 			_copyAssets(dir).then(() => {
@@ -467,5 +469,6 @@ String.prototype.capitalizeFirstLetter = function() {
 }
 
 export {
-	AppIO
+	AppIO,
+	appIO
 };

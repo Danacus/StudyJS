@@ -47,7 +47,7 @@ class LocalIO {
 					globals.file.path = null;
 				}
 
-				let dir = settings.folder + "/" + globals.file.subject + "/";
+				let dir = settings.local.folder + "/" + globals.file.subject + "/";
 
 				if (!fs.existsSync(dir)) {
 					fs.mkdirSync(dir);
@@ -85,7 +85,7 @@ function _open() {
 		let files = [];
 
 		var stream = readdirp({
-			root: settings.folder,
+			root: settings.local.folder,
 			fileFilter: '*.json'
 		});
 		stream
@@ -170,11 +170,27 @@ function _save(file, content) {
 
 function _checkFolder() {
 	return new Promise(function(resolve, reject) {
-		if (settings.folder) {
+		if (settings.local.folder) {
 			resolve();
 			return;
 		}
 
+		_setFolder().then(() => {
+			resolve();
+		}).catch((err) => {
+			reject(err);
+		})
+	});
+}
+
+$(document).ready(function() {
+	$(".setFolder").click(function() {
+		_setFolder();
+	});
+});
+
+function _setFolder() {
+	return new Promise(function(resolve, reject) {
 		dialog.showOpenDialog({
 			title: "Select Default Folder",
 			properties: ['openDirectory']
@@ -183,7 +199,8 @@ function _checkFolder() {
 				reject("No folder selected!");
 				return;
 			}
-			settings.folder = folders[0];
+			settings.local.folder = folders[0];
+			$(".settings-input[data-setting='local.folder']").val(settings.local.folder);
 
 			saveSettings().then(() => {
 				resolve();
