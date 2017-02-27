@@ -1,8 +1,5 @@
-import fs from 'fs';
-var readdirp = require('readdirp'),
-	path = require('path'),
-	es = require('event-stream');
-
+const jetpack = require('fs-jetpack');
+const path = require('path');
 import {
 	remote,
 	ipcRenderer
@@ -24,12 +21,6 @@ import {
 	AppIO
 } from './io3';
 
-var getHomePath = require("home-path");
-var appRoot = getHomePath() + "/StudyJS";
-
-var Promise = require('bluebird');
-var readFile = Promise.promisify(fs.readFile);
-var writeFile = Promise.promisify(fs.writeFile);
 
 //Singleton reference
 var localIO;
@@ -49,9 +40,7 @@ class LocalIO {
 
 				let dir = settings.local.folder + "/" + globals.file.subject + "/";
 
-				if (!fs.existsSync(dir)) {
-					fs.mkdirSync(dir);
-				}
+				jetpack.dir(dir);
 
 				_save(dir + globals.file.name, serializer.serialize()).then(() => {
 					$("#dialog").modal("hide");
@@ -81,50 +70,43 @@ class LocalIO {
 
 function _open() {
 	return new Promise(function(resolve, reject) {
-
 		let files = [];
 
-		var stream = readdirp({
-			root: settings.local.folder,
-			fileFilter: '*.json'
-		});
-		stream
-			.on('warn', function(err) {
-				reject(err);
-				// optionally call stream.destroy() here in order to abort and cause 'close' to be emitted
-			})
-			.on('error', function(err) {
-				reject(err);
-			})
-			.pipe(es.mapSync(function(entry) {
-				files.push({
-					name: entry.name,
-					path: entry.fullPath,
-					subject: path.dirname(entry.path).split("/")[path.dirname(entry.path).split("/").length - 1]
-				});
+		jetpack.findAsync(settings.local.folder, {
+			matching: '*.json'
+		}).then((data) => {
+			console.log(data.length);
+			data.forEach((item) => {
+				console.log("lol");
 
-				showFilesList(files).then((button) => {
-					const name = button.data("filename");
-					const subject = button.data("filesubject");
-					const path = button.data("filepath");
-					console.log(button);
-					console.log(path);
-					readFile(path, "utf-8").then((data) => {
-						globals.file.name = name;
-						globals.file.path = path;
-						globals.file.subject = subject;
-						document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
-						AppIO.loadFile(data);
-						$("#drive").modal("hide");
-						resolve();
-					}).catch((err) => {
-						reject(err);
-					});
-				}).catch(() => {
-					reject("No file selected!");
+				files.push({
+					name: path.basename(item),
+					path: item,
+					subject: path.dirname(item).split("/")[path.dirname(item).split("/").length - 1]
 				});
-			})).pipe(es.stringify())
-			.pipe(process.stdout);
+			});
+
+			showFilesList(files).then((button) => {
+				const name = button.data("filename");
+				const subject = button.data("filesubject");
+				const path = button.data("filepath");
+				console.log(button);
+				console.log(path);
+				jetpack.readAsync(path).then((data) => {
+					globals.file.name = name;
+					globals.file.path = path;
+					globals.file.subject = subject;
+					document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
+					AppIO.loadFile(data);
+					$("#drive").modal("hide");
+					resolve();
+				}).catch((err) => {
+					reject(err);
+				});
+			}).catch(() => {
+				reject("No file selected!");
+			});
+		});
 	});
 }
 
@@ -157,7 +139,7 @@ function _save(file, content) {
 		$(".eq-math").each(() => {
 			$(this).html($(this).data("formula"));
 		});
-		writeFile(file, content).then(() => {
+		jetpack.writeAsync(file, content).then(() => {
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 			document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 			updateStyle();

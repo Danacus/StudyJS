@@ -1,52 +1,41 @@
-import fs from 'fs';
 import {
 	remote,
 	ipcRenderer
 } from 'electron';
+var app = remote.app;
 var dialog = remote.dialog;
 import $ from 'jquery';
-import ncp from 'ncp';
 import {
 	serializer
 } from '../serialize';
-
 import {
 	driveIO
 } from './driveIO';
-
 import {
 	localIO
 } from './localIO';
-
 import {
 	showDialog,
-	showNotification,
-	showFilesList
+	showNotification
 } from '../../dialog';
-import {
-	EventEmitter
-} from 'events'
-var getHomePath = require("home-path");
-import {
-	mkdirp
-} from 'mkdirp';
-var request = require('request');
-var Zip = require('machinepack-zip');
 import {
 	loadSettings,
 	saveSettings,
 	settings
 } from '../../settings';
-
+const path = require('path');
 import {
 	exportFile
 } from '../export';
+var jetpack = require('fs-jetpack');
+import {
+	chmodCopy
+} from '../chmodCopy';
+import {
+	colorImport
+} from './colorImport';
 
-var Promise = require('bluebird');
-var readFile = Promise.promisify(fs.readFile);
-var writeFile = Promise.promisify(fs.writeFile);
-
-var appRoot = getHomePath() + "/StudyJS";
+const appData = path.join(app.getPath("userData"), "/data/");
 
 var services;
 var appIO;
@@ -61,9 +50,14 @@ class AppIO {
 			Local: localIO,
 			GoogleDrive: driveIO
 		};
-		if (!fs.existsSync(appRoot + "/app/")) {
-			_downloadAssets(function() {
+		if (!jetpack.exists(app.getPath("userData") + "/data/")) {
+			_copyResources().then(() => {
 				_load();
+			}).catch((err) => {
+				showNotification({
+					type: "alert-danger",
+					content: err
+				});
 			});
 		} else {
 			_load();
@@ -141,7 +135,6 @@ class AppIO {
 								});
 							});
 						});
-
 				});
 		}
 	}
@@ -181,7 +174,7 @@ class AppIO {
 
 		const dir = settings.local.folder + "/" + globals.file.subject;
 
-		writeFile(dir + "/" + globals.file.name.replace(".json", ".html"), file).then(() => {
+		jetpack.append(dir + "/" + globals.file.name.replace(".json", ".html"), file).then(() => {
 			_copyAssets(dir).then(() => {
 				showNotification({
 					type: "alert-success",
@@ -200,30 +193,6 @@ class AppIO {
 			});
 		});;
 
-	}
-
-	addColor() {
-		showDialog({
-			title: "Import Color",
-			content: "Import from file or from <a href='https://coolors.co/'>coolors.co</a>?",
-			buttons: [{
-					label: "Local"
-				},
-				{
-					label: "Coolors.co"
-				}
-			]
-		}).then((button) => {
-			if (button.label == "Local") {
-				_addColor();
-			} else if (button.label == "Coolors.co") {
-				_importColor();
-			}
-		});
-	}
-
-	loadColors() {
-		_loadColors();
 	}
 }
 
@@ -244,100 +213,19 @@ function _newFile() {
 }
 
 function _load() {
-	_loadColors();
+	colorImport.loadColors();
 	loadViewer();
-}
-
-function _importColor() {
-	showDialog({
-		title: "Import Color",
-		content: '<div class="form-group"><label for="usr">URL:</label><input type="text" class="form-control" id="coolorsUrl"><label for="usr">Name:</label><input type="text" class="form-control" id="coolorsName"></div>',
-		buttons: [{
-			label: "Import"
-		}]
-	}).then((button) => {
-		const url = $("#coolorsUrl").val();
-		const col = url.split("/")[url.split("/").length - 1];
-		let colors = {
-			colors: []
-		};
-
-		const colSplit = col.split("-");
-
-		colSplit.forEach((color) => {
-			colors.colors.push("#" + color);
-		});
-
-		const name = $("#coolorsName").val();
-		const file = JSON.stringify(colors);
-
-		console.log(name);
-
-		writeFile(appRoot + "/app/colors/" + name + ".json", file).then(() => {
-			showNotification({
-				type: "alert-success",
-				content: "Color added"
-			});
-			_loadColors();
-		});
-	});
-}
-
-function _addColor() {
-	dialog.showOpenDialog(function(fileNames) {
-		if (fileNames === undefined) {
-			showNotification({
-				type: "alert-warning",
-				content: "No file selected!"
-			});
-		} else {
-			ncp(fileNames[0], appRoot + "/app/colors/" + fileNames[0].split("/")[fileNames[0].split("/").length - 1], function(err) {
-				if (err) {
-					showNotification({
-						type: "alert-danger",
-						content: "Cannot import color! " + err
-					});
-					return console.error(err);
-				}
-				showNotification({
-					type: "alert-success",
-					content: "Color added"
-				});
-				_loadColors();
-			});
-		}
-	});
-}
-
-function _exportDocument() {
-	let newDoc = $('<div id="document2"></div>').appendTo($(document.body));
-	$(".eq-math").each(() => {
-		$(this).html($(this).data("formula"));
-	});
-	newDoc.html($("#document").html());
-
-	newDoc.find('*').each(function() {
-		$(this).removeAttr("id spellcheck contenteditable");
-		$(this).removeClass("mce-content-body mce-edit-focus");
-	});
-
-	const file = template.replace("<!--replaceme-->", newDoc.html());
-
-	MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-
-	newDoc.remove();
-	return file;
 }
 
 function _copyAssets(target) {
 	return new Promise(function(resolve, reject) {
-		ncp(appRoot + "/app/dist", target, function(err) {
-			if (err) {
-				reject();
-				return console.error(err);
-			}
+		jetpack.copyAsync(path.join(appData, "/dist"), target, {
+			overwrite: true
+		}).then(() => {
 			resolve();
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+		}).catch((err) => {
+			reject(err);
 		});
 	});
 }
@@ -375,85 +263,11 @@ function _close() {
 	});
 }
 
-function _downloadAssets(callback) {
-	if (!fs.existsSync(appRoot)) {
-		fs.mkdirSync(appRoot);
-	}
-
-	request('https://github.com/Danacus/StudyJS/raw/master/app/dist/assets.zip')
-		.pipe(fs.createWriteStream(appRoot + '/assets.zip'))
-		.on('close', function() {
-			Zip.unzip({
-				source: appRoot + '/assets.zip',
-				destination: appRoot,
-			}).exec({
-				success: function() {
-					callback();
-				},
-
-				error: function(err) {
-					showNotification({
-						type: "alert-danger",
-						content: "Failed to download assets: " + err
-					})
-				}
-			});
-		});
-}
-
-function _resetTinyMCE() {
-	$("#document").find('*').each(function() {
-		$(this).removeAttr("id spellcheck contenteditable");
-		$(this).removeClass("mce-content-body mce-edit-focus");
-	});
-	initTinyMCE();
-}
-
-function _loadColors() {
-	$(".color-item").remove();
-	_readDir(appRoot + "/app/colors/").then((colors) => {
-		console.log("Load Colors");
-		colors.forEach((colorItem, index) => {
-			let li = $(`<li
-				class='color-item'
-				data-index=${index}><a href='#'>${colorItem.name.unCamelCase()}</a></li>`)
-				.prependTo($("#col"));
-
-			li.children(":first").click(function() {
-				setColors(colors[$(this).parent().data("index")].col);
-				updateStyle();
-				_resetTinyMCE();
-			});
-		});
-	}).catch((err) => {
-		console.error(err);
-		showNotification({
-			type: "alert-danger",
-			content: "Cannot load colors! " + err
-		});
-	});
-}
-
-function _readDir(dirname) {
+function _copyResources() {
 	return new Promise(function(resolve, reject) {
-		let files = [];
-
-		fs.readdir(dirname, function(err, filenames) {
-			if (err) {
-				reject(err);
-				return;
-			}
-			filenames.forEach((filename, index) => {
-				files.push({
-					name: filename.replace(".json", ""),
-					col: JSON.parse(fs.readFileSync(dirname + filename, 'utf-8')).colors
-				});
-
-				if (index == filenames.length - 1) {
-					resolve(files);
-				}
-			});
-		});
+		chmodCopy(path.join(app.getAppPath(), "/app/dist"), path.join(app.getPath("userData"), "/data/dist/"));
+		chmodCopy(path.join(app.getAppPath(), "/app/colors"), path.join(app.getPath("userData"), "/data/colors/"));
+		resolve();
 	});
 }
 

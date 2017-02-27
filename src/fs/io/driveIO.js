@@ -1,4 +1,3 @@
-import fs from 'fs';
 import {
 	ipcRenderer
 } from 'electron';
@@ -18,17 +17,20 @@ import {
 	AppIO,
 	appIO
 } from './io3';
-
+const jetpack = require('fs-jetpack');
+const path = require('path');
+import {
+	remote
+} from 'electron';
+var app = remote.app;
+const appData = path.join(app.getPath("userData"), "/data/");
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
-var getHomePath = require('home-path');
-var appRoot = getHomePath() + "/StudyJS";
 
 var authClient;
 
 var authorizeCallback;
 
-//Singleton reference
 var driveIO;
 const service = google.drive('v3');
 
@@ -402,7 +404,7 @@ function newFile(auth, subject, fileName, content) {
 
 function read(auth, id) {
 	return new Promise(function(resolve, reject) {
-		const dest = fs.createWriteStream(appRoot + "/" + id + ".json");
+		const dest = jetpack.createWriteStream(appData + "/" + id + ".json");
 		service.files.get({
 				fileId: id,
 				alt: 'media',
@@ -412,11 +414,10 @@ function read(auth, id) {
 				reject("Error during download! " + err);
 			})
 			.pipe(dest).on("finish", function() {
-				fs.readFile(appRoot + "/" + id + ".json", "utf-8", function(err, data) {
-					if (err) {
-						reject("Error reading file! " + err);
-					}
+				jetpack.readAsync(appData + "/" + id + ".json").then((data) => {
 					resolve(data);
+				}).catch((err) => {
+					reject(err);
 				});
 			});
 	});

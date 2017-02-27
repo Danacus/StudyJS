@@ -10,6 +10,9 @@ import {
 import {
 	AppIO
 } from './fs/io/io3';
+import {
+	ColorImport
+} from './fs/io/colorImport';
 import fs from 'fs';
 import {
 	MQEdit
@@ -34,8 +37,10 @@ var appIO;
 var driveIO;
 var editor;
 var mqEdit;
+var colorImport;
 
 $(document).ready(function() {
+	colorImport = new ColorImport();
 	new DriveIO();
 	new LocalIO();
 	appIO = new AppIO();
@@ -138,7 +143,7 @@ $(document).ready(function() {
 	});
 
 	$("#colors").click(function() {
-		appIO.addColor();
+		colorImport.addColor();
 	});
 
 	$("#eqedit").click(function() {

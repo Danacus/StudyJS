@@ -1,13 +1,14 @@
-var getHomePath = require('home-path');
-var appRoot = getHomePath() + "/StudyJS";
-import fs from 'fs';
+const jetpack = require('fs-jetpack');
+const path = require('path');
+import {
+	remote
+} from 'electron';
+var app = remote.app;
+const appData = path.join(app.getPath("userData"), "/data/");
+const getHomePath = require("home-path");
 import {
 	showNotification
 } from './dialog';
-
-var Bluebird = require("bluebird");
-var readFile = Bluebird.promisify(fs.readFile);
-var writeFile = Bluebird.promisify(fs.writeFile);
 
 var settings = {
 	drive: {
@@ -49,8 +50,11 @@ function showSettingsDialog() {
 
 var loadSettings = function() {
 	return new Promise(function(resolve, reject) {
-		readFile(appRoot + "/settings.json").then(function(data) {
-			settings = JSON.parse(data);
+		jetpack.file(appData + "/settings.json");
+		jetpack.readAsync(appData + "/settings.json").then(function(data) {
+			if (data != "") {
+				settings = JSON.parse(data);
+			}
 
 			$(".settings-input").each(function() {
 				let setting = $(this).data("setting").split(".");
@@ -77,7 +81,7 @@ var saveSettings = function(callback) {
 			let setting = $(this).data("setting").split(".");
 			settings[setting[0]][setting[1]] = $(this).val();
 		});
-		writeFile(appRoot + "/settings.json", JSON.stringify(settings)).then(function(data) {
+		jetpack.writeAsync(appData + "/settings.json", JSON.stringify(settings)).then(function(data) {
 			resolve();
 		}).catch(function(err) {
 			showNotification({
