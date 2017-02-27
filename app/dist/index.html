@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>StudyJS</title>
+    <link href="css/main.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        #files {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        #content {
+            width: 100%;
+            height: 100%;
+        }
+
+        label {
+            font-size: 30px;
+            text-align: center;
+            position: absolute;
+            border-style: dotted;
+            border-radius: 20px;
+            border-color: #777777;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 70%;
+            height: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .small {
+            font-size: 15px;
+            color: #777777;
+        }
+
+        label:hover {
+            cursor: pointer;
+        }
+
+        .navbar-nav>li>a {
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+        }
+
+        .navbar {
+            min-height: 50px !important
+        }
+    </style>
+
+    <body>
+        <script src="js/jquery-3.1.1.min.js"></script>
+        <script>
+            window.jQuery = window.$;
+            $(document).ready(function() {
+                loadViewer();
+            });
+        </script>
+        <script type="text/x-mathjax-config"> MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 100 } }); </script>
+        <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+        </script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/viewer.js"></script>
+        <script src="js/style.js"></script>
+        <script src="js/dialog.js"></script>
+        <script src="js/serialize.js"></script>
+        <!--folderdata-->
+        <script src="js/filedrop.js"></script>
+        <script>
+            $(document).ready(function() {
+                let serializer = new Serializer();
+
+                $("#content").css({
+                    "margin-right": "-200%"
+                });
+
+                $("#label").click(function() {
+                    $("#files").click();
+                });
+
+                $(".close").click(function() {
+                    closeDocument();
+                });
+
+                $("#files").on('change', function(e) {
+                    var file = e.target.files[0];
+                    var reader = new FileReader()
+                    reader.onload = function(event) {
+                        $("#document").html("");
+                        openDocument();
+                        serializer.deserialize(JSON.parse(event.target.result));
+                    }
+                    reader.readAsText(file)
+                });
+
+                $(window).filedrop({
+                    callback: function(data) {
+
+                        let json = JSON.parse(data);
+
+                        if (json.colors) {
+                            setColors(json.colors);
+                            updateStyle();
+                        } else {
+                            $("#document").html("");
+                            openDocument();
+                            serializer.deserialize(json);
+                        }
+                        loadViewer();
+                    }
+                });
+            });
+
+            function openDocument() {
+                $("#content").animate({
+                    "margin-right": "0px"
+                }, 1000);
+                $("#label").animate({
+                    "margin-left": "-200%"
+                }, 1000);
+            }
+
+            function closeDocument() {
+                $("#content").animate({
+                    "margin-right": "-200%"
+                }, 1000);
+                $("#label").animate({
+                    "margin-left": "0px"
+                }, 1000);
+            }
+        </script>
+
+        <div id="content">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <ul class="nav navbar-nav">
+                        <li><a href="#"><button type="button" class="close" aria-label="Close">
+  <span aria-hidden="true">&times;</span>
+</button></a></li>
+                    </ul>
+                </div>
+            </nav>
+            <div id="document">
+
+            </div>
+        </div>
+
+
+        <input type="file" id="files" name="files[]" multiple />
+        <label for="file" id="label"><span class="label-span">Drag and Drop<br><span class="small">or click to select a file</span></span></label>
+    </body>
+
+</html>

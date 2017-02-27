@@ -136,9 +136,6 @@ function _saveDialog() {
 
 function _save(file, content) {
 	return new Promise(function(resolve, reject) {
-		$(".eq-math").each(() => {
-			$(this).html($(this).data("formula"));
-		});
 		jetpack.writeAsync(file, content).then(() => {
 			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 			document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;

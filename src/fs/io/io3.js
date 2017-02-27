@@ -24,6 +24,8 @@ import {
 	settings
 } from '../../settings';
 const path = require('path');
+const open = require("open");
+const glob = require("glob")
 import {
 	exportFile
 } from '../export';
@@ -50,8 +52,9 @@ class AppIO {
 			Local: localIO,
 			GoogleDrive: driveIO
 		};
-		if (!jetpack.exists(app.getPath("userData") + "/data/")) {
+		if (jetpack.exists(app.getPath("userData") + "/data/dist/") != "dir") {
 			_copyResources().then(() => {
+				console.log("Resources copied");
 				_load();
 			}).catch((err) => {
 				showNotification({
@@ -170,15 +173,57 @@ class AppIO {
 	}
 
 	exportFile() {
-		const file = exportFile();
+		if (!globals.file.name || !globals.file.subject) {
+			return;
+		}
+
+		const file = serializer.serialize();
 
 		const dir = settings.local.folder + "/" + globals.file.subject;
 
-		jetpack.append(dir + "/" + globals.file.name.replace(".json", ".html"), file).then(() => {
-			_copyAssets(dir).then(() => {
-				showNotification({
-					type: "alert-success",
-					content: "File Exported!"
+		const viewerDir = settings.local.folder + "/viewer/";
+
+		jetpack.dir(viewerDir);
+
+		jetpack.writeAsync(dir + "/" + globals.file.name, file).then(() => {
+			_copyAssets(viewerDir).then(() => {
+				if (globals.service == "Local") {
+					document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
+				}
+
+				let index = jetpack.read(viewerDir + "/index.html");
+
+				glob(settings.local.folder + "/**/*.json", {}, function(err, files) {
+					if (err) {
+						showNotification({
+							type: "alert-danger",
+							content: "Cannot export file! " + err
+						});
+						return;
+					}
+
+					let data = [];
+
+					files.forEach((file) => {
+						data.push({
+							name: file.replace(".json", "").split(/[/]+/).pop(),
+							subject: path.dirname(file).split(/[/]+/).pop(),
+							path: file
+						});
+					});
+
+					index = index.replace("<!--folderdata-->", `<script>var files = '${JSON.stringify(data)}'</script>`);
+
+					console.log(index);
+
+					jetpack.write(viewerDir + "/index.html", index);
+
+					open(viewerDir + "/index.html");
+
+					showNotification({
+						type: "alert-success",
+						content: "File Exported!"
+					});
 				});
 			}).catch((err) => {
 				showNotification({
@@ -191,8 +236,10 @@ class AppIO {
 				type: "alert-danger",
 				content: "Cannot export file! " + err
 			});
-		});;
+		});
 
+		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+		updateStyle();
 	}
 }
 

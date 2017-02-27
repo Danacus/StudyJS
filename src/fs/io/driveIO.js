@@ -28,7 +28,6 @@ var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
 var authClient;
-
 var authorizeCallback;
 
 var driveIO;
