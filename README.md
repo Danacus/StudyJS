@@ -3,8 +3,11 @@ StudyJS (help me find a better name!)
 
 This is a simple desktop application built with electron. It allows you to create structured summaries of your school matter.
 
-You might know me from a recent reddit post:
+You might know me from a reddit post:
 https://www.reddit.com/r/ProgrammerHumor/comments/5un65s/it_took_some_time_to_fix_this/ 
+
+You can find the roadmap here:
+https://trello.com/b/7qOs6hn4/studyjs-need-better-name
 
 
 Installing
