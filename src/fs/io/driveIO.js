@@ -196,7 +196,7 @@ function authorizeDrive(token) {
 			resolve();
 		}).catch((err) => {
 			requestToken();
-			reject(err);
+			//reject(err);
 		});
 	});
 }

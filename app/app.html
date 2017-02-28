@@ -64,7 +64,13 @@
                 height: 30,
                 textcolor_map: c,
                 textcolor_cols: "2",
-                textcolor_rows: "3"
+                textcolor_rows: "3",
+                setup: function(ed) {
+                    ed.on('change', function(e) {
+                        globals.saved = false;
+                        document.title = globals.title + " - " + (globals.file.subject || "") + " - " + (globals.file.name || "New File") + "*";
+                    });
+                }
             });
         }
     </script>

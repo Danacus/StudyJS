@@ -8,13 +8,13 @@ function showDialog(properties) {
 			} else {
 				var dialog = $(".dialog");
 
-				dialog.find(".modal-title").text(properties.title || "Dialog");
-				dialog.find(".modal-body").html(properties.content || "");
-				dialog.find(".modal-footer").html("");
-
 				if (properties.buttons.length == 0) {
 					resolve();
 				}
+
+				dialog.find(".modal-title").text(properties.title || "Dialog");
+				dialog.find(".modal-body").html(properties.content || "");
+				dialog.find(".modal-footer").html("");
 
 				properties.buttons.forEach((button) => {
 					var _button = $(`<button type="button"
@@ -35,19 +35,16 @@ function showDialog(properties) {
 function _fadeContent(properties) {
 	return new Promise(function(resolve) {
 		if (($(".dialog").data('bs.modal') || {}).isShown) {
-			let modalContent = $(".dialog").find(".modal-container").first();
-			let container = $("<div class='modal-container-new'></div>").appendTo(modalContent.parent());
-			console.log(modalContent[0]);
-			let content = $(".dialog").find(".modal-container");
-			let newTitle = $(`<div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title"></h4></div>`).appendTo(container);
+			let content = $(".dialog").find(".modal-container").first();
+			let newContent = $("<div class='modal-container-new'></div>").appendTo(content.parent());
+
+			let newTitle = $(`<div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title"></h4></div>`).appendTo(newContent);
 			newTitle.children(".modal-title").text(properties.title || "Dialog");
-			let newBody = $(`<div class="modal-body"></div>`).appendTo(container);
+			let newBody = $(`<div class="modal-body"></div>`).appendTo(newContent);
 			newBody.html(properties.content || "");
-			let newFooter = $(`<div class="modal-footer"></div>`).appendTo(container);
+			let newFooter = $(`<div class="modal-footer"></div>`).appendTo(newContent);
 			newFooter.html("");
-			if (properties.buttons.length == 0) {
-				resolve();
-			}
+
 			properties.buttons.forEach((button) => {
 				var _button = $(`<button type="button"
 				class="btn ${(button.type || "btn-default")}">${button.label}</button>`)
@@ -62,24 +59,22 @@ function _fadeContent(properties) {
 				"max-height": content.css("height"),
 				"overflow-y": "hidden"
 			});
-
-			content.parent().animate({
-				"max-height": container.height() + 10 + "px"
-			}, {
-				duration: 500,
-				easing: "easeOutQuad"
-			});
-
 			content.css({
 				"overflow-y": "hidden",
 				"overflow-x": "hidden",
 				"float": "left",
 				"width": "100%"
 			});
-
-			container.css({
+			newContent.css({
 				"margin-left": "600px",
 				"margin-right": "-600px"
+			});
+
+			content.parent().animate({
+				"max-height": newContent.height() + "px"
+			}, {
+				duration: 500,
+				easing: "easeOutQuad"
 			});
 			content.animate({
 				"padding": "0",
@@ -89,19 +84,20 @@ function _fadeContent(properties) {
 				easing: "easeOutQuad",
 				complete: () => {
 					content.remove();
-					container.attr("class", "modal-container");
+					newContent.attr("class", "modal-container");
 					content.parent().css({
 						"overflow-y": "auto"
 					});
 				}
 			});
-			container.animate({
+			newContent.animate({
 				"margin-left": "0px",
 				"margin-right": "0px"
 			}, {
 				duration: 500,
 				easing: "easeOutQuad"
 			});
+
 		} else {
 			resolve();
 		}
@@ -183,11 +179,10 @@ function showFilesList(files) {
 			title: "Open File",
 			content: list,
 			buttons: []
-		}).then(() => {
-			$(".files-list-item").click(function() {
-				console.log("click");
-				resolve($(this));
-			});
+		});
+
+		$(".files-list-item").click(function() {
+			resolve($(this));
 		});
 
 		$(".dialog").bind("hidden.bs.modal", function() {

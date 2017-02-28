@@ -29,10 +29,6 @@ class LocalIO {
 	static writeFile(createNew = false) {
 		return new Promise(function(resolve, reject) {
 			_checkFolder().then(() => {
-				if (createNew) {
-					globals.file.path = null;
-				}
-
 				let dir = settings.local.folder + "/" + globals.file.subject + "/";
 
 				jetpack.dir(dir);
@@ -89,11 +85,9 @@ function _open() {
 				console.log(path);
 				jetpack.readAsync(path).then((data) => {
 					globals.file.name = name;
-					globals.file.path = path;
 					globals.file.subject = subject;
 					document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 					AppIO.loadFile(data);
-					$("#drive").modal("hide");
 					resolve();
 				}).catch((err) => {
 					reject(err);
@@ -116,12 +110,10 @@ document.body.ondrop = (ev) => {
 		AppIO.close().then(() => {
 			globals.service = "Local";
 			globals.file.name = path.basename(item);
-			globals.file.path = item;
 			globals.file.subject = path.dirname(item).split("/")[path.dirname(item).split("/").length - 1];
 			document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 			AppIO.loadFile(data);
-			$("#drive").modal("hide");
-
+			$(".dialog").modal("hide");
 		}).catch((err) => {
 			console.log(err);
 		});
@@ -130,30 +122,6 @@ document.body.ondrop = (ev) => {
 	});
 
 	ev.preventDefault();
-}
-
-function _saveDialog() {
-	return new Promise(function(resolve, reject) {
-		if (!globals.file.path) {
-			dialog.showOpenDialog({
-				title: "Select Folder",
-				properties: ['openDirectory']
-			}, function(folders) {
-				if (folders === undefined) {
-					reject("No folder selected!");
-					return;
-				}
-				_save(folders[0] + "/" + globals.file.name, Serializer.serialize()).then(() => {
-					$("#dialog").modal("hide");
-					resolve();
-				}).catch((err) => {
-					reject(err);
-				});
-			});
-		} else {
-			resolve();
-		}
-	});
 }
 
 function _save(file, content) {

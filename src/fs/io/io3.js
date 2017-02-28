@@ -77,7 +77,7 @@ class AppIO {
 	}
 
 	static save(service = globals.service) {
-		if (service) {
+		if (service && (globals.file.name || globals.file.id)) {
 			services[service].writeFile().then(() => {
 				showNotification({
 					type: "alert-success",
@@ -302,8 +302,8 @@ function _close() {
 				if (button.label == "Yes") {
 					$("#document").html("");
 					globals.file.id = null;
-					globals.file.path = null;
 					globals.file.name = null;
+					globals.file.subject = null;
 					resolve();
 				} else {
 					reject();
@@ -312,6 +312,9 @@ function _close() {
 			});
 		} else {
 			$("#document").html("");
+			globals.file.id = null;
+			globals.file.name = null;
+			globals.file.subject = null;
 			resolve();
 		}
 	});
