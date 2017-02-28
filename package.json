@@ -43,6 +43,7 @@
     "googleapis": "^16.1.0",
     "home-path": "^1.0.3",
     "jquery": "^3.1.1",
+    "jquery-ui": "^1.12.1",
     "machinepack-zip": "^1.1.0",
     "mkdirp": "^0.5.1",
     "ncp": "^2.0.0",

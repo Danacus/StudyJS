@@ -3,10 +3,11 @@ import {
 } from 'electron';
 import {
 	showNotification,
+	showDialog,
 	showFilesList
 } from '../../dialog';
 import {
-	serializer
+	Serializer
 } from '../serialize';
 import {
 	loadSettings,
@@ -14,8 +15,7 @@ import {
 	settings
 } from '../../settings';
 import {
-	AppIO,
-	appIO
+	AppIO
 } from './io3';
 const jetpack = require('fs-jetpack');
 const path = require('path');
@@ -30,13 +30,10 @@ var googleAuth = require('google-auth-library');
 var authClient;
 var authorizeCallback;
 
-var driveIO;
 const service = google.drive('v3');
 
 class DriveIO {
 	constructor() {
-		driveIO = this;
-
 		loadSettings().then(() => {
 			if (settings.drive.token) {
 				authorizeDrive(settings.drive.token).then(() => {
@@ -50,7 +47,7 @@ class DriveIO {
 			}
 		});
 	}
-	writeFile(createNew) {
+	static writeFile(createNew) {
 		if (!globals.drive.authorized) {
 			authorizeCallback = "save";
 			requestToken();
@@ -58,14 +55,18 @@ class DriveIO {
 		}
 
 		if (!createNew) {
-			return update(authClient, globals.file.id, serializer.serialize());
+			return update(authClient, globals.file.id, Serializer.serialize());
 		} else {
-			return newFile(authClient, globals.file.subject, globals.file.name, serializer.serialize());
+			return newFile(authClient, globals.file.subject, globals.file.name, Serializer.serialize());
 		}
 	}
-	openFile() {
+	static openFile() {
 		return new Promise(function(resolve, reject) {
-			$(".loading").modal("show");
+			showDialog({
+				title: "Loading Files",
+				content: `<div class="loader"></div>`,
+				buttons: []
+			});
 
 			if (!globals.drive.authorized) {
 				authorizeCallback = "open";
@@ -83,8 +84,7 @@ class DriveIO {
 }
 
 export {
-	DriveIO,
-	driveIO
+	DriveIO
 };
 
 function open() {
@@ -104,10 +104,9 @@ function open() {
 				}
 			});
 
-			$(".loading").modal("hide");
 
 			showFilesList(fileList).then((button) => {
-				$("#drive").modal("hide");
+
 				const id = button.data("fileid");
 				const name = button.data("filename");
 				const subject = button.data("filesubject");
@@ -143,7 +142,7 @@ ipcRenderer.on('token', function(event, message) {
 			globals.drive.authorized = true;
 
 			if (authorizeCallback == "save") {
-				driveIO.writeFile();
+				DriveIO.writeFile();
 			}
 
 			if (authorizeCallback == "open") {
@@ -152,7 +151,7 @@ ipcRenderer.on('token', function(event, message) {
 						type: "alert-danger",
 						content: "Cannot open file! " + err
 					});
-					appIO.newFile();
+					AppIO.newFile();
 				});
 			}
 
@@ -286,7 +285,7 @@ function getFiles(auth) {
 				console.log(resp.files.length);
 
 				if (resp.files.length == 0) {
-					$(".loading").modal("hide");
+					$(".dialog").modal("hide");
 					reject("Folder is empty!");
 				}
 

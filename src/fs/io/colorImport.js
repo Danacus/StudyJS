@@ -12,13 +12,8 @@ import {
 } from '../../dialog';
 const appData = path.join(app.getPath("userData"), "/data/");
 
-var colorImport;
-
 class ColorImport {
-	constructor() {
-		colorImport = this;
-	}
-	addColor() {
+	static addColor() {
 		showDialog({
 			title: "Import Color",
 			content: "Import from file or from <a href='https://coolors.co/'>coolors.co</a>?",
@@ -38,7 +33,7 @@ class ColorImport {
 		});
 	}
 
-	loadColors() {
+	static loadColors() {
 		_loadColors();
 	}
 }
@@ -156,6 +151,5 @@ function _resetTinyMCE() {
 }
 
 export {
-	ColorImport,
-	colorImport
+	ColorImport
 };

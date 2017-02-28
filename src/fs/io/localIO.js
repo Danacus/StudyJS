@@ -15,23 +15,18 @@ import {
 	saveSettings
 } from '../../settings';
 import {
-	serializer
+	Serializer
 } from '../serialize';
 import {
 	AppIO
 } from './io3';
 
 
-//Singleton reference
-var localIO;
-
 class LocalIO {
 	constructor() {
-		localIO = this;
-
 		loadSettings();
 	}
-	writeFile(createNew = false) {
+	static writeFile(createNew = false) {
 		return new Promise(function(resolve, reject) {
 			_checkFolder().then(() => {
 				if (createNew) {
@@ -42,7 +37,7 @@ class LocalIO {
 
 				jetpack.dir(dir);
 
-				_save(dir + globals.file.name, serializer.serialize()).then(() => {
+				_save(dir + globals.file.name, Serializer.serialize()).then(() => {
 					$("#dialog").modal("hide");
 					globals.saved = true;
 					resolve();
@@ -54,7 +49,7 @@ class LocalIO {
 			});
 		});
 	}
-	openFile() {
+	static openFile() {
 		return new Promise(function(resolve, reject) {
 			_checkFolder().then(() => {
 				_open().then((data) => {
@@ -110,6 +105,33 @@ function _open() {
 	});
 }
 
+document.ondragover = document.ondrop = (ev) => {
+	ev.preventDefault();
+}
+
+document.body.ondrop = (ev) => {
+	let item = ev.dataTransfer.files[0].path;
+	console.log(item);
+	jetpack.readAsync(item).then((data) => {
+		AppIO.close().then(() => {
+			globals.service = "Local";
+			globals.file.name = path.basename(item);
+			globals.file.path = item;
+			globals.file.subject = path.dirname(item).split("/")[path.dirname(item).split("/").length - 1];
+			document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
+			AppIO.loadFile(data);
+			$("#drive").modal("hide");
+
+		}).catch((err) => {
+			console.log(err);
+		});
+	}).catch((err) => {
+		console.log(err);
+	});
+
+	ev.preventDefault();
+}
+
 function _saveDialog() {
 	return new Promise(function(resolve, reject) {
 		if (!globals.file.path) {
@@ -121,7 +143,7 @@ function _saveDialog() {
 					reject("No folder selected!");
 					return;
 				}
-				_save(folders[0] + "/" + globals.file.name, serializer.serialize()).then(() => {
+				_save(folders[0] + "/" + globals.file.name, Serializer.serialize()).then(() => {
 					$("#dialog").modal("hide");
 					resolve();
 				}).catch((err) => {
@@ -191,6 +213,5 @@ function _setFolder() {
 }
 
 export {
-	LocalIO,
-	localIO
+	LocalIO
 };

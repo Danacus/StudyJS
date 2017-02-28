@@ -1,12 +1,7 @@
 var json = [];
 
-var serializer;
-
 class Serializer {
-	constructor() {
-		serializer = this;
-	}
-	serialize() {
+	static serialize() {
 		json = [];
 
 		$(".eq-math").each(() => {
@@ -21,7 +16,7 @@ class Serializer {
 
 		return JSON.stringify(json);
 	}
-	deserialize(obj) {
+	static deserialize(obj) {
 		for (var i = 0; i < obj.length; i++) {
 			$("#document").deserialize(obj[i]);
 		}

@@ -33,20 +33,12 @@ import {
 } from './settings';
 
 var app = remote.app;
-var appIO;
-var driveIO;
-var editor;
-var mqEdit;
-var colorImport;
 
 $(document).ready(function() {
-	colorImport = new ColorImport();
 	new DriveIO();
 	new LocalIO();
-	appIO = new AppIO();
-	editor = new Editor();
-	mqEdit = new MQEdit();
-	new Serializer();
+	new AppIO();
+	new MQEdit();
 	initTinyMCE();
 });
 
@@ -62,60 +54,44 @@ $(document).keypress(function(e) {
 var listener = new window.keypress.Listener();
 
 listener.simple_combo("ctrl down", function() {
-	editor.addContainer(editor.add.after);
-});
-
-listener.simple_combo("cmd down", function() {
-	editor.addContainer(editor.add.after);
+	Editor.addContainer(Editor.add.after);
 });
 
 listener.simple_combo("ctrl up", function() {
-	editor.addContainer(editor.add.before);
-});
-
-listener.simple_combo("cmd up", function() {
-	editor.addContainer(editor.add.before);
+	Editor.addContainer(Editor.add.before);
 });
 
 listener.simple_combo("ctrl right", function() {
-	editor.addContainer(editor.add.child);
-});
-
-listener.simple_combo("cmd right", function() {
-	editor.addContainer(editor.add.child);
+	Editor.addContainer(Editor.add.child);
 });
 
 listener.simple_combo("ctrl left", function() {
-	editor.addContainer(editor.add.parent);
-});
-
-listener.simple_combo("cmd left", function() {
-	editor.addContainer(editor.add.parent);
+	Editor.addContainer(Editor.add.parent);
 });
 
 listener.simple_combo("alt down", function() {
-	editor.addBody();
+	Editor.addBody();
 });
 
 //IPC recievers
 ipcRenderer.on('save', function(event, message) {
-	appIO.save();
+	AppIO.save();
 });
 
 ipcRenderer.on('saveas', function(event, message) {
-	appIO.save(null);
+	AppIO.save(null);
 });
 
 ipcRenderer.on('open', function(event, message) {
-	appIO.open();
+	AppIO.open();
 });
 
 ipcRenderer.on('new', function(event, message) {
-	appIO.newFile();
+	AppIO.newFile();
 });
 
 ipcRenderer.on('export', function(event, message) {
-	appIO.exportFile();
+	AppIO.exportFile();
 });
 
 ipcRenderer.on('logout', function(event, message) {
@@ -127,34 +103,34 @@ ipcRenderer.on('logout', function(event, message) {
 
 $(document).ready(function() {
 	$("#save").click(function() {
-		appIO.save();
+		AppIO.save();
 	});
 
 	$("#open").click(function() {
-		appIO.open();
+		AppIO.open();
 	});
 
 	$("#new").click(function() {
-		appIO.newFile();
+		AppIO.newFile();
 	});
 
 	$("#export").click(function() {
-		appIO.exportFile();
+		AppIO.exportFile();
 	});
 
 	$("#colors").click(function() {
-		colorImport.addColor();
+		ColorImport.addColor();
 	});
 
 	$("#eqedit").click(function() {
-		mqEdit.open();
+		MQEdit.open();
 	});
 
 	$("#eq-insert").click(function() {
-		mqEdit.insert();
+		MQEdit.insert();
 	});
 
 	$("#eq-close").click(function() {
-		mqEdit.close();
+		MQEdit.close();
 	});
 });

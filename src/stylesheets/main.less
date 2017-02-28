@@ -34,7 +34,7 @@ a {
   border: 8px solid #f3f3f3;
   border-radius: 50%;
   border-top: 8px solid #777777;
-  margin: auto;
+  margin-left: 250px;
   width: 50px;
   height: 50px;
   animation: spin 2s linear infinite;
@@ -69,12 +69,29 @@ textarea:focus, input:focus, button:focus{
   outline: none !important;
 }
 
-.driveListItem:hover {
+.files-list-item:hover {
   cursor: pointer;
 }
 
 .settings-page:hover {
   cursor: pointer;
+}
+
+.modal-content {
+  overflow-x: hidden;
+}
+
+.dialog {
+
+}
+
+.modal-container, .modal-container-new {
+  display: block;
+  overflow-x: hidden;
+}
+
+.modal-header {
+  max-height: 50px;
 }
 
 div[data-depth='0']>div.panel>div.panel-heading>p:first-child {
@@ -106,7 +123,7 @@ ul {
   margin-left: -25px;
 }
 
-#drive-list {
+#files-list {
   margin-left: 0px;
   overflow-y:auto;
   max-height: 600px !important;

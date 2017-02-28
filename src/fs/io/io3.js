@@ -6,13 +6,13 @@ var app = remote.app;
 var dialog = remote.dialog;
 import $ from 'jquery';
 import {
-	serializer
+	Serializer
 } from '../serialize';
 import {
-	driveIO
+	DriveIO
 } from './driveIO';
 import {
-	localIO
+	LocalIO
 } from './localIO';
 import {
 	showDialog,
@@ -34,7 +34,7 @@ import {
 	chmodCopy
 } from '../chmodCopy';
 import {
-	colorImport
+	ColorImport
 } from './colorImport';
 
 const appData = path.join(app.getPath("userData"), "/data/");
@@ -49,8 +49,8 @@ class AppIO {
 	constructor() {
 		appIO = this;
 		services = {
-			Local: localIO,
-			GoogleDrive: driveIO
+			Local: LocalIO,
+			GoogleDrive: DriveIO
 		};
 		if (jetpack.exists(app.getPath("userData") + "/data/dist/") != "dir") {
 			_copyResources().then(() => {
@@ -68,20 +68,22 @@ class AppIO {
 	}
 
 	static loadFile(data) {
-		serializer.deserialize(JSON.parse(data));
+		Serializer.deserialize(JSON.parse(data));
 		initTinyMCE();
 		updateStyle();
 		loadViewer();
+		$(".dialog").modal("hide");
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 	}
 
-	save(service = globals.service) {
+	static save(service = globals.service) {
 		if (service) {
 			services[service].writeFile().then(() => {
 				showNotification({
 					type: "alert-success",
 					content: "File saved!"
 				});
+				$(".dialog").modal("hide");
 			}).catch((err) => {
 				showNotification({
 					type: "alert-danger",
@@ -131,6 +133,7 @@ class AppIO {
 									type: "alert-success",
 									content: "File saved!"
 								});
+								$(".dialog").modal("hide");
 							}).catch((err) => {
 								showNotification({
 									type: "alert-danger",
@@ -142,7 +145,7 @@ class AppIO {
 		}
 	}
 
-	open() {
+	static open() {
 		showDialog({
 				title: "Open File",
 				content: "Open local file or open file on Google Drive?",
@@ -156,7 +159,7 @@ class AppIO {
 				_close().then(() => {
 					globals.service = button.label.replace(/ /g, '');
 					services[globals.service].openFile().then(() => {
-
+						$(".dialog").modal("hide");
 					}).catch((err) => {
 						showNotification({
 							type: "alert-danger",
@@ -168,16 +171,20 @@ class AppIO {
 			});
 	}
 
-	newFile() {
+	static newFile() {
 		_newFile();
 	}
 
-	exportFile() {
+	static close() {
+		return _close();
+	}
+
+	static exportFile() {
 		if (!globals.file.name || !globals.file.subject) {
 			return;
 		}
 
-		const file = serializer.serialize();
+		const file = Serializer.serialize();
 
 		const dir = settings.local.folder + "/" + globals.file.subject;
 
@@ -260,7 +267,7 @@ function _newFile() {
 }
 
 function _load() {
-	colorImport.loadColors();
+	ColorImport.loadColors();
 	loadViewer();
 }
 

@@ -9,17 +9,19 @@ var container = `
 	</div>
 `;
 
+const add = {
+	before: 1,
+	after: 2,
+	child: 3,
+	parent: 4
+}
+
 class Editor {
-	constructor() {
-		this.add = {
-			before: 1,
-			after: 2,
-			child: 3,
-			parent: 4
-		}
+	static get add() {
+		return add;
 	}
 
-	addContainer(type, attributes = {}) {
+	static addContainer(type, attributes = {}) {
 		let div;
 		let parent = $(".mce-edit-focus").parents("div[data-type='container']").first();
 
@@ -54,7 +56,7 @@ class Editor {
 		autoScroll(div);
 	}
 
-	addBody() {
+	static addBody() {
 		let parent = $(".mce-edit-focus").parents(".panel").first();
 		let div = $("<div class='panel-body' data-type='editable' style='min-height: 0px'></div>").appendTo(parent);
 		updateColors();

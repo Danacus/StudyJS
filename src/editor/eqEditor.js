@@ -200,7 +200,7 @@ class MQEdit {
 			})
 		})
 	}
-	open() {
+	static open() {
 		console.log("open");
 		var answerSpan = document.getElementById('eq-field');
 		answerMathField = MQ.MathField(answerSpan, {
@@ -213,10 +213,10 @@ class MQEdit {
 		answerMathField.latex("");
 		enteredMath = answerMathField.latex();
 	}
-	close() {
+	static close() {
 		$("#eq-editor").modal("hide");
 	}
-	insert() {
+	static insert() {
 		console.log(enteredMath);
 		tinymce.activeEditor.execCommand('mceInsertRawHTML', false, "<span class='eq-math' data-formula='$" + enteredMath + "$'>$" + enteredMath + "$</span><span>&nbsp;</span>");
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);

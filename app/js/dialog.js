@@ -1,24 +1,6 @@
 function showDialog(properties) {
 	return new Promise(function(resolve) {
-		var dialog = $(
-			`
-				<div class="modal dialog fade" role="dialog">
-						<div class="modal-dialog">
-								<div class="modal-content">
-										<div class="modal-header">
-												<button type="button" class="close" data-dismiss="modal">&times;</button>
-												<h4 class="modal-title"></h4>
-										</div>
-										<div class="modal-body">
-												<p></p>
-										</div>
-										<div class="modal-footer">
-										</div>
-								</div>
-						</div>
-				</div>
-			`
-		);
+		var dialog = $(".dialog");
 
 		dialog.find(".modal-title").text(properties.title || "Dialog");
 		dialog.find(".modal-body").html(properties.content || "");
