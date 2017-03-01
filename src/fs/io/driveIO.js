@@ -2,7 +2,6 @@ import {
 	ipcRenderer
 } from 'electron';
 import {
-	showNotification,
 	showDialog,
 	showFilesList
 } from '../../dialog';
@@ -39,10 +38,11 @@ class DriveIO {
 				authorizeDrive(settings.drive.token).then(() => {
 					globals.drive.authorized = true;
 				}).catch((err) => {
-					showNotification({
-						type: 'alert-warning',
-						content: err
-					})
+					$.notify({
+						message: "Cannot login to Google Drive! " + err
+					}, {
+						type: 'danger'
+					});
 				});
 			}
 		});
@@ -147,9 +147,10 @@ ipcRenderer.on('token', function(event, message) {
 
 			if (authorizeCallback == "open") {
 				open().catch((err) => {
-					showNotification({
-						type: "alert-danger",
-						content: "Cannot open file! " + err
+					$.notify({
+						message: "Cannot open file! " + err
+					}, {
+						type: 'danger'
 					});
 					AppIO.newFile();
 				});

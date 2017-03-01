@@ -7,8 +7,7 @@ import {
 var app = remote.app;
 var dialog = remote.dialog;
 import {
-	showDialog,
-	showNotification
+	showDialog
 } from '../../dialog';
 const appData = path.join(app.getPath("userData"), "/data/");
 
@@ -62,9 +61,10 @@ function _importColor() {
 		const file = JSON.stringify(colors);
 
 		jetpack.append(path.join(appData, "/colors/", name + ".json"), file).then(() => {
-			showNotification({
-				type: "alert-success",
-				content: "Color added"
+			$.notify({
+				message: "Color Added!"
+			}, {
+				type: 'success'
 			});
 			_loadColors();
 		});
@@ -74,21 +74,24 @@ function _importColor() {
 function _addColor() {
 	dialog.showOpenDialog(function(fileNames) {
 		if (fileNames === undefined) {
-			showNotification({
-				type: "alert-warning",
-				content: "No file selected!"
+			$.notify({
+				message: "No file selected!"
+			}, {
+				type: 'warning'
 			});
 		} else {
 			jetpack.copyAsync(fileNames[0], path.join(appData, "/colors/", fileNames[0].split("/")[fileNames[0].split("/").length - 1])).then(() => {
-				showNotification({
-					type: "alert-success",
-					content: "Color added"
+				$.notify({
+					message: "Color Added!"
+				}, {
+					type: 'success'
 				});
 				_loadColors();
 			}).catch((err) => {
-				showNotification({
-					type: "alert-danger",
-					content: "Cannot import color! " + err
+				$.notify({
+					message: "Cannot import color! " + err
+				}, {
+					type: 'danger'
 				});
 			});
 		}
@@ -113,10 +116,10 @@ function _loadColors() {
 			});
 		});
 	}).catch((err) => {
-		console.error(err);
-		showNotification({
-			type: "alert-danger",
-			content: "Cannot load colors! " + err
+		$.notify({
+			message: "Cannot load colors! " + err
+		}, {
+			type: 'danger'
 		});
 	});
 }

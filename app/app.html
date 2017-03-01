@@ -10,7 +10,8 @@
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/mathquill.css" />
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/mathquill.css">
 
 </head>
 
@@ -107,21 +108,7 @@
         </div>
     </nav>
 
-    <div class="modal fade" id="drive" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" id="drive-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Open File</h4>
-                </div>
-                <div class="modal-body" id="drive-body">
-                    <ul class="list-group" id="drive-list">
 
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="modal dialog fade" role="dialog">
         <div class="modal-dialog">
@@ -160,16 +147,6 @@
                 <div class="modal-footer">
                     <button id="eq-insert" type="button" class="btn btn-primary">Insert</button>
                     <button id="eq-close" type="button" class="btn btn-default">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal loading fade" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="loader"></div>
                 </div>
             </div>
         </div>
@@ -221,6 +198,7 @@
         </div>
     </div>
 
+
     <div id="document">
         <div data-type='container' data-depth='0'>
             <div class="panel panel-default">
@@ -228,6 +206,8 @@
             </div>
         </div>
     </div>
+
+
 
 
 </html>

@@ -15,8 +15,7 @@ import {
 	LocalIO
 } from './localIO';
 import {
-	showDialog,
-	showNotification
+	showDialog
 } from '../../dialog';
 import {
 	loadSettings,
@@ -57,9 +56,10 @@ class AppIO {
 				console.log("Resources copied");
 				_load();
 			}).catch((err) => {
-				showNotification({
-					type: "alert-danger",
-					content: err
+				$.notify({
+					message: err
+				}, {
+					type: 'danger'
 				});
 			});
 		} else {
@@ -73,21 +73,25 @@ class AppIO {
 		updateStyle();
 		loadViewer();
 		$(".dialog").modal("hide");
+		menu.close();
 		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 	}
 
 	static save(service = globals.service) {
 		if (service && (globals.file.name || globals.file.id)) {
 			services[service].writeFile().then(() => {
-				showNotification({
-					type: "alert-success",
-					content: "File saved!"
+				$.notify({
+					message: "File Saved!"
+				}, {
+					type: 'success'
 				});
 				$(".dialog").modal("hide");
+				menu.close();
 			}).catch((err) => {
-				showNotification({
-					type: "alert-danger",
-					content: "Cannot save file! " + err
+				$.notify({
+					message: "Cannot save file! " + err
+				}, {
+					type: 'danger'
 				});
 				globals.service = null;
 				this.save();
@@ -129,15 +133,18 @@ class AppIO {
 							globals.file.subject = $("#fileSubject").val().toLowerCase().capitalizeFirstLetter();
 
 							services[service].writeFile(true).then(() => {
-								showNotification({
-									type: "alert-success",
-									content: "File saved!"
+								$.notify({
+									message: "File Saved!"
+								}, {
+									type: 'success'
 								});
 								$(".dialog").modal("hide");
+								menu.close();
 							}).catch((err) => {
-								showNotification({
-									type: "alert-danger",
-									content: "Cannot save file! " + err
+								$.notify({
+									message: "Cannot save file! " + err
+								}, {
+									type: 'danger'
 								});
 							});
 						});
@@ -161,9 +168,10 @@ class AppIO {
 					services[globals.service].openFile().then(() => {
 						$(".dialog").modal("hide");
 					}).catch((err) => {
-						showNotification({
-							type: "alert-danger",
-							content: "Cannot open file! " + err
+						$.notify({
+							message: "Cannot open file! " + err
+						}, {
+							type: 'danger'
 						});
 						_newFile();
 					});
@@ -202,9 +210,10 @@ class AppIO {
 
 				glob(settings.local.folder + "/**/*.json", {}, function(err, files) {
 					if (err) {
-						showNotification({
-							type: "alert-danger",
-							content: "Cannot export file! " + err
+						$.notify({
+							message: "Cannot export file! " + err
+						}, {
+							type: 'danger'
 						});
 						return;
 					}
@@ -227,21 +236,24 @@ class AppIO {
 
 					open(viewerDir + "/index.html");
 
-					showNotification({
-						type: "alert-success",
-						content: "File Exported!"
+					$.notify({
+						message: "File Exported!"
+					}, {
+						type: 'success'
 					});
 				});
 			}).catch((err) => {
-				showNotification({
-					type: "alert-danger",
-					content: "Cannot export file! " + err
+				$.notify({
+					message: "Cannot export file! " + err
+				}, {
+					type: 'danger'
 				});
 			});
 		}).catch((err) => {
-			showNotification({
-				type: "alert-danger",
-				content: "Cannot export file! " + err
+			$.notify({
+				message: "Cannot export file! " + err
+			}, {
+				type: 'danger'
 			});
 		});
 

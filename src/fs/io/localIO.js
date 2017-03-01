@@ -6,7 +6,6 @@ import {
 } from 'electron';
 var dialog = remote.dialog;
 import {
-	showNotification,
 	showFilesList
 } from '../../dialog';
 import {

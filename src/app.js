@@ -35,6 +35,20 @@ import {
 var app = remote.app;
 
 $(document).ready(function() {
+
+	$.notifyDefaults({
+		allow_dismiss: true,
+		delay: 5000,
+		timer: 1000,
+		animate: {
+			enter: 'animated fadeInDown',
+			exit: 'animated fadeOutUp'
+		},
+		placement: {
+			from: "top",
+			align: "center"
+		}
+	});
 	new DriveIO();
 	new LocalIO();
 	new AppIO();
@@ -104,6 +118,10 @@ ipcRenderer.on('logout', function(event, message) {
 $(document).ready(function() {
 	$("#save").click(function() {
 		AppIO.save();
+	});
+
+	$("#saveas").click(function() {
+		AppIO.save(null);
 	});
 
 	$("#open").click(function() {

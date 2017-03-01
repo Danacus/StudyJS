@@ -9,25 +9,148 @@ html, body {
 
 body {
     display: flex;
-    justify-content: center;
+    //justify-content: center;
     align-items: top;
     font-family: sans-serif;
+    background-color: #fefcf9 !important;
 }
+
+.splash {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+    background-color: #fefcf9 !important;
+    z-index: 50000000;
+    position: fixed;
+}
+
+.modal-content, .modal-body, .modal-footer, .modal-header, .btn-default, .btn-primary, .list-group-item, input {
+  background-color: #fefcf9 !important;
+}
+
+.modal-content, .modal-body, .modal-footer, .modal-header {
+  border-color: #fefcf9 !important;
+}
+
+.btn-default:hover, .btn-primary:hover {
+  background-color: #f1f1f1 !important;
+}
+
+.btn-primary {
+  color: inherit !important;
+  border-color: #777777 !important;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+input[type="time"]:focus,
+input[type="week"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="color"]:focus,
+.uneditable-input:focus {
+  background-color: #fefcf9 !important;
+  border-color: rgba(196, 196, 196, 0.8) !important;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(196, 196, 196, 0.6) !important;
+  outline: 0 none !important;
+}
+
+
 
 a {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
+a.fa {
+  color: #777777;
+  padding: 10px 10px 10px 10px;
+}
+
+a.fa:focus {
+  color: #777777;
+}
+
+a.fa:hover {
+  color: inherit;
+}
+
+.navbar-default {
+  background: none !important;
+}
+
+.hamburger {
+  margin-top: -3px !important;
+  margin-left: 5px !important;
+  position: fixed;
+  z-index: 6;
+  margin-left: auto;
+  transition: margin .5s ease !important;
+}
+
+.hamburger:hover, .hamburger:focus {
+  background-color: inherit !important;
+}
+
+.hamburger.toggled {
+  margin-left: 250px !important;
+}
+
+#editor-controls {
+  margin-right: 10px;
+}
+
+.editor-toolbar {
+  margin-top: 13px;
+  display: block;
+}
+
+.editor-toolbar .fa {
+  color: #777777;
+}
+
+.editor-toolbar .btn {
+  border-radius: 0;
+  border-width: 0px;
+  transition: background-color 0.5s linear;
+  background-color: rgb(254, 252, 249);
+}
+
+.btn-toolbar {
+  width: 100%;
+  height: 60px;
+  background-color: rgb(254, 252, 249);
+  position: fixed;
+  z-index: 5;
+}
 
 #document {
+  background-color: rgb(254, 252, 249);
   width: 98%;
   padding: 0px 0px 0px 0px;
   min-height: 100px;
-  margin-top: 60px;
+  margin-top: 80px;
   margin-right: 2%;
-  margin-left: 0px;
+  margin-left: 20px;
   position: absolute;
   overflow-y: visible;
+  transition: all 0.5s ease;
+}
+
+#document.toggled {
+  margin-left: 270px;
 }
 
 .loader {
@@ -139,6 +262,12 @@ ul {
 
 #settings-dialog .page.active {
   display: inherit !important;
+}
+
+.settings-page.active {
+  background-color: #2F343F !important;
+  border-color: #2F343F !important;
+  color: #fefcf9 !important;
 }
 
 

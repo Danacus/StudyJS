@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>StudyJS - New File</title>
+
+    <link href="css/main.css" rel="stylesheet" type="text/css">
+
+    <script src="helpers/context_menu.js"></script>
+    <script src="helpers/external_links.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/mathquill.css">
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script>
+        window.jQuery = window.$ = require('jquery');
+    </script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+    <script src="js/mathquill.js"></script>
+    <script>
+        var MQ = MathQuill.getInterface(2);
+    </script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-notify.min.js"></script>
+    <script src="js/keypress-2.1.4.min.js"></script>
+    <script src="app.js"></script>
+    <script src="js/viewer.js"></script>
+    <script src="js/style.js"></script>
+    <script src="js/globals.js"></script>
+    <script src="tinymce.min.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 100 } });
+    </script>
+    <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+    </script>
+    <script type="text/javascript" src="js/tinymce-config.js">
+    </script>
+
+
+
+    <div id="wrapper" class="toggled">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <p>
+                        StudyJS
+                    </p>
+                </li>
+                <li>
+                    <a href="#" id="save"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save</a>
+                </li>
+                <li>
+                    <a href="#" id="saveas"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save as</a>
+                </li>
+                <li>
+                    <a href="#" class="close-menu" id="new"><i class="fa fa-file" aria-hidden="true"></i> New</a>
+                </li>
+                <li>
+                    <a href="#" id="open"><i class="fa fa-folder-open" aria-hidden="true"></i> Open</a>
+                </li>
+                <li>
+                    <a href="#" id="settings-button"><i class="fa fa-wrench" aria-hidden="true"></i> Settings</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!--<a href="#" class="fa fa-bars fa-2x toggle-menu pull-right" aria-hidden="true"></a>-->
+
+    <!--
+    <button class="hamburger hamburger--slider toggle-menu pull-right" type="button">
+      <span class="hamburger-box">
+        <span class="hamburger-inner"></span>
+      </span>
+    </button>-->
+
+
+
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group pull-left editor-toolbar">
+            <a class="btn btn-default toggle-menu hamburger" href="#">
+                <i class="fa fa-bars fa-2x"></i>
+            </a>
+        </div>
+        <div class="btn-group pull-right editor-toolbar" id="editor-controls">
+            <a class="btn btn-default" href="#" data-tinymce-cmd="JustifyLeft">
+                <i class="fa fa-align-left"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="JustifyCenter">
+                <i class="fa fa-align-center"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="JustifyRight">
+                <i class="fa fa-align-right"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="JustifyFull">
+                <i class="fa fa-align-justify"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Indent">
+                <i class="fa fa-indent"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Outdent">
+                <i class="fa fa-outdent"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="InsertUnorderedList">
+                <i class="fa fa-list-ul"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="InsertOrderedList">
+                <i class="fa fa-list-ol"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Bold">
+                <i class="fa fa-bold"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Italic">
+                <i class="fa fa-italic"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Underline">
+                <i class="fa fa-underline"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Strikethrough">
+                <i class="fa fa-strikethrough"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Subscript">
+                <i class="fa fa-subscript"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Superscript">
+                <i class="fa fa-superscript"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Cut">
+                <i class="fa fa-cut"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Copy">
+                <i class="fa fa-copy"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Paste">
+                <i class="fa fa-paste"></i>
+            </a>
+            <a class="btn btn-default" href="#" data-tinymce-cmd="Unlink">
+                <i class="fa fa-chain-broken"></i>
+            </a>
+        </div>
+    </div>
+
+    <div id="document" class="close-menu">
+        <div data-type='container' data-depth='0'>
+            <div class="panel panel-default">
+                <div class="panel-heading" data-type='editable'></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal dialog fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class='modal-container'>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="eq-editor" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Equation Editor</h4>
+                </div>
+                <div class="modal-body">
+                    <p><span id="eq-field"></span></p>
+                    <p><span id="eq-latex"></span></p>
+
+                    <div id="eq-menu">
+                        <div class="panel list-group" id="eq-panel">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="eq-insert" type="button" class="btn btn-primary">Insert</button>
+                    <button id="eq-close" type="button" class="btn btn-default">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="settings-dialog" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Settings</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-3 col-md-6 col-lg-4" class="settings-sidebar">
+                        <ul class="list-group">
+                            <li class="list-group-item settings-page active" data-target="general">General</li>
+                            <li class="list-group-item settings-page" data-target="storage">Storage</li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-9 col-md-6 col-lg-8" class="settings-content">
+                        <div class="page general active">
+                            <h4><strong>General Settings</strong></h4>
+                        </div>
+                        <div class="page storage">
+                            <h4><strong>Storage Settings</strong></h4>
+                            <br>
+                            <h4><strong>Local</strong></h4>
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <label for="local-path">Default path:</label>
+                                    <input type="local-path" class="form-control settings-input" data-setting="local.folder">
+                                    <a href="#" class="setFolder"><span class="glyphicon glyphicon-folder-open"></span></a>
+                                </div>
+                            </form>
+                            <h4><strong>Drive</strong></h4>
+                            <form class="form-inline">
+                                <div class="form-group">
+                                    <label for="local-path">Default folder:</label>
+                                    <input type="local-path" class="form-control settings-input" data-setting="drive.folder">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary apply" data-dismiss="modal">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="splash">
+
+    </div>
+
+
+    <!-- Menu Toggle Script -->
+    <script>
+        $(".close-menu").click(function(e) {
+            e.preventDefault();
+            menu.close();
+        });
+
+        $(".toggle-menu").click(function(e) {
+            e.preventDefault();
+            menu.toggle();
+        });
+
+        $("#wrapper, #sidebar-wrapper").css({
+            "transition": "all .5s ease"
+        });
+
+        window.setTimeout(() => {
+            $(".splash").css({
+                "pointer-events": "none"
+            });
+            $(".splash").animate({
+                "opacity": "0"
+            }, 500);
+        }, 500);
+
+        var menu = {
+            open: function() {
+                $("#wrapper").removeClass("toggled");
+                $("#document, .hamburger").addClass("toggled");
+                $(".hamburger").addClass('is-active');
+            },
+            close: function() {
+                $("#wrapper").addClass("toggled");
+                $("#document, .hamburger").removeClass("toggled");
+                $(".hamburger").removeClass('is-active');
+            },
+            toggle: function() {
+                $("#wrapper, #document, .hamburger").toggleClass("toggled");
+                $(".hamburger").toggleClass('is-active');
+            }
+        }
+    </script>
+
+</body>
+
+</html>
