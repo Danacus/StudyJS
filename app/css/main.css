@@ -137,6 +137,7 @@ a.fa:hover {
 }
 #document.toggled {
   margin-left: 270px;
+  width: calc(98% - 250px);
 }
 .loader {
   border: 8px solid #f3f3f3;
@@ -241,4 +242,16 @@ ul {
   background-color: #2F343F !important;
   border-color: #2F343F !important;
   color: #fefcf9 !important;
+}
+::-webkit-scrollbar-track {
+  border-radius: 6px;
+  background-color: #fefcf9;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  background-color: #fefcf9;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: #bfbfbf;
 }

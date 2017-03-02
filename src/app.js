@@ -16,7 +16,7 @@ import {
 import fs from 'fs';
 import {
 	MQEdit
-} from './editor/eqEditor';
+} from './editor/eqEditor2';
 import {
 	Serializer
 } from './fs/serialize';
@@ -52,7 +52,7 @@ $(document).ready(function() {
 	new DriveIO();
 	new LocalIO();
 	new AppIO();
-	new MQEdit();
+	MQEdit.load();
 	initTinyMCE();
 });
 

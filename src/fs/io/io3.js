@@ -2,6 +2,9 @@ import {
 	remote,
 	ipcRenderer
 } from 'electron';
+import {
+	MQEdit
+} from '../../editor/eqEditor2';
 var app = remote.app;
 var dialog = remote.dialog;
 import $ from 'jquery';
@@ -74,7 +77,8 @@ class AppIO {
 		loadViewer();
 		$(".dialog").modal("hide");
 		menu.close();
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+		//MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+		MQEdit.load();
 	}
 
 	static save(service = globals.service) {
@@ -146,6 +150,7 @@ class AppIO {
 								}, {
 									type: 'danger'
 								});
+								$(".dialog").modal("hide");
 							});
 						});
 				});
@@ -173,6 +178,7 @@ class AppIO {
 						}, {
 							type: 'danger'
 						});
+						$(".dialog").modal("hide");
 						_newFile();
 					});
 				});

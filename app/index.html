@@ -11,7 +11,7 @@
 
     <title>StudyJS - New File</title>
 
-    <link href="css/main.css" rel="stylesheet" type="text/css">
+
 
     <script src="helpers/context_menu.js"></script>
     <script src="helpers/external_links.js"></script>
@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/mathquill.css">
     <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/animate.css">
+    <link href="css/main.css" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -48,11 +49,11 @@
     <script src="js/style.js"></script>
     <script src="js/globals.js"></script>
     <script src="tinymce.min.js"></script>
-    <script type="text/x-mathjax-config">
+    <!--<script type="text/x-mathjax-config">
         MathJax.Hub.Config({ tex2jax: { inlineMath: [["$","$"]] }, CommonHTML: { scale: 100 } });
     </script>
     <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
-    </script>
+    </script>-->
     <script type="text/javascript" src="js/tinymce-config.js">
     </script>
 
@@ -163,6 +164,11 @@
             <a class="btn btn-default" href="#" data-tinymce-cmd="Unlink">
                 <i class="fa fa-chain-broken"></i>
             </a>
+        </div>
+        <div class="btn-group pull-right editor-toolbar dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-paint-brush" aria-hidden="true"></i> <span class="caret"></span></button>
+            <ul class="dropdown-menu" role="menu" id="col">
+            </ul>
         </div>
     </div>
 
@@ -291,6 +297,18 @@
                 "opacity": "0"
             }, 500);
         }, 500);
+
+
+        // Add slideDown animation to Bootstrap dropdown when expanding.
+        $('.dropdown').on('show.bs.dropdown', function() {
+            $(this).find('.dropdown-menu').first().stop(true, true).slideDown("fast");
+        });
+
+        // Add slideUp animation to Bootstrap dropdown when collapsing.
+        $('.dropdown').on('hide.bs.dropdown', function() {
+            $(this).find('.dropdown-menu').first().stop(true, true).slideUp("fast");
+        });
+
 
         var menu = {
             open: function() {
