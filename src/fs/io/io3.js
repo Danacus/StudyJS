@@ -72,13 +72,10 @@ class AppIO {
 
 	static loadFile(data) {
 		Serializer.deserialize(JSON.parse(data));
-		initTinyMCE();
 		updateStyle();
 		loadViewer();
 		$(".dialog").modal("hide");
 		menu.close();
-		//MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-		MQEdit.load();
 	}
 
 	static save(service = globals.service) {
@@ -262,8 +259,6 @@ class AppIO {
 				type: 'danger'
 			});
 		});
-
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 		updateStyle();
 	}
 }
@@ -295,7 +290,6 @@ function _copyAssets(target) {
 			overwrite: true
 		}).then(() => {
 			resolve();
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 		}).catch((err) => {
 			reject(err);
 		});

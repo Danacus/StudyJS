@@ -1,25 +1,26 @@
+import {
+	MQEdit
+} from '../editor/eqEditor2';
+
 var json = [];
 
 class Serializer {
 	static serialize() {
+		MQEdit.unload();
 		json = [];
-
-		$(".eq-math").each(() => {
-			$(this).html($(this).data("formula"));
-		});
 
 		$("#document").children("[data-type='container']").each(function() {
 			json.push($(this).serialize());
 		});
 
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-
+		MQEdit.load();
 		return JSON.stringify(json);
 	}
 	static deserialize(obj) {
 		for (var i = 0; i < obj.length; i++) {
 			$("#document").deserialize(obj[i]);
 		}
+		MQEdit.load();
 	}
 }
 

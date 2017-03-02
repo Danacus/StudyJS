@@ -126,7 +126,6 @@ document.body.ondrop = (ev) => {
 function _save(file, content) {
 	return new Promise(function(resolve, reject) {
 		jetpack.writeAsync(file, content).then(() => {
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 			document.title = globals.title + " - " + globals.file.subject + " - " + globals.file.name;
 			updateStyle();
 			resolve();

@@ -164,12 +164,24 @@
             <a class="btn btn-default" href="#" data-tinymce-cmd="Unlink">
                 <i class="fa fa-chain-broken"></i>
             </a>
+
         </div>
         <div class="btn-group pull-right editor-toolbar dropdown">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><i class="fa fa-paint-brush" aria-hidden="true"></i> <span class="caret"></span></button>
             <ul class="dropdown-menu" role="menu" id="col">
             </ul>
+            <a class="btn btn-default" id="insert-formula" href="#">
+                f(x)
+            </a>
         </div>
+    </div>
+
+    <div id="mq-editor">
+        <span id="mq-edit-field"></span>
+        <table class="table table-bordered" id="mq-table">
+            <tbody id="mq-table-body">
+            </tbody>
+        </table>
     </div>
 
     <div id="document" class="close-menu">
@@ -313,16 +325,16 @@
         var menu = {
             open: function() {
                 $("#wrapper").removeClass("toggled");
-                $("#document, .hamburger").addClass("toggled");
+                $("#document, #mq-editor, .hamburger").addClass("toggled");
                 $(".hamburger").addClass('is-active');
             },
             close: function() {
                 $("#wrapper").addClass("toggled");
-                $("#document, .hamburger").removeClass("toggled");
+                $("#document, #mq-editor, .hamburger").removeClass("toggled");
                 $(".hamburger").removeClass('is-active');
             },
             toggle: function() {
-                $("#wrapper, #document, .hamburger").toggleClass("toggled");
+                $("#wrapper, #document, #mq-editor, .hamburger").toggleClass("toggled");
                 $(".hamburger").toggleClass('is-active');
             }
         }

@@ -9,6 +9,8 @@ function initTinyMCE() {
 		}
 	}
 
+
+
 	tinymce.init({
 		selector: 'div[data-type="editable"]',
 		inline: true,

@@ -52,6 +52,7 @@ $(document).ready(function() {
 	new DriveIO();
 	new LocalIO();
 	new AppIO();
+	MQEdit.init();
 	MQEdit.load();
 	initTinyMCE();
 });
@@ -144,7 +145,7 @@ $(document).ready(function() {
 		MQEdit.open();
 	});
 
-	$("#eq-insert").click(function() {
+	$("#insert-formula").click(function() {
 		MQEdit.insert();
 	});
 

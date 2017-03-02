@@ -134,6 +134,7 @@ a.fa:hover {
   position: absolute;
   overflow-y: visible;
   transition: all 0.5s ease;
+  min-height: 90%;
 }
 #document.toggled {
   margin-left: 270px;
@@ -242,6 +243,37 @@ ul {
   background-color: #2F343F !important;
   border-color: #2F343F !important;
   color: #fefcf9 !important;
+}
+#mq-editor {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  transition: all 0.5s ease;
+  margin-bottom: -800px;
+  z-index: 100;
+  background-color: #fefcf9;
+}
+#mq-editor.toggled {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+}
+#mq-editor.mq-field-active {
+  margin-bottom: 0px;
+}
+#mq-edit-field {
+  width: 100%;
+  font-size: 25px;
+  border-color: #777777;
+}
+#mq-edit-field.mq-focused {
+  width: 100%;
+  font-size: 25px;
+  border-color: #777777;
+  box-shadow: none;
+}
+.mq-button {
+  height: 60px;
+  width: 60px;
 }
 ::-webkit-scrollbar-track {
   border-radius: 6px;

@@ -29,8 +29,6 @@ var eqConfig = [{
 				">",
 				"\\leq",
 				"\\geq",
-				"\\leqslant",
-				"\\geqslant",
 				"\\subset",
 				"\\supset",
 				"\\not\\subset",
@@ -64,7 +62,6 @@ var eqConfig = [{
 			[
 				"+",
 				"-",
-				"\\#",
 				"\\neg",
 				"\\pm",
 				"\\mp",
@@ -75,7 +72,7 @@ var eqConfig = [{
 				"\\cup",
 				"\\cap",
 				"\\setminus",
-				"\\sqrt"
+				"\\sqrt{x}"
 			]
 		]
 	},
@@ -85,7 +82,7 @@ var eqConfig = [{
 			[
 				"\\exists",
 				"\\exists!",
-				"\\nexists",
+				"\\not\\exists",
 				"\\forall",
 				"\\neg",
 				"\\lor",
@@ -104,13 +101,11 @@ var eqConfig = [{
 		label: "Geometry",
 		latex: [
 			[
-				"\\overline",
+				"\\overline{x}",
 				"\\triangle",
-				"\\overrightarrow",
+				"\\overrightarrow{x}",
 				"\\cong",
-				"\\ncong",
 				"\\sim",
-				"\\nsim",
 				"\\parallel",
 				"\\nparallel",
 				"\\perp",
@@ -154,34 +149,121 @@ var eqConfig = [{
 				"\\cot",
 				"\\log",
 				"\\ln",
-				"\\sum",
+				"\\sum_x^x",
 				"\\int",
-				"\\prod",
-				"\\coprod",
+				"\\prod_x^x",
+				"\\coprod_x^x",
 				"\\lim",
 				"\\infty"
 			]
 		]
 	},
+	/*{
+		label: "Set Notation",
+		latex: [
+			[
+				"\\N",
+				"\\Z",
+				"\\Q",
+				"\\R",
+				"\\C"
+			]
+		]
+	},*/
 	{
 		label: "Other",
 		latex: [
 			[
-				"_",
-				"^",
+				"{x}_{x}",
+				"{x}^{x}",
 			]
 		]
 	}
 ]
 
 class MQEdit {
+	static init() {
+		let table = $("#mq-table-body");
+		let row = $(`<tr><div class="btn-group btn-group-lg btn-group-justified btn-group-fill-height"></div></tr>`).appendTo(table);
+		eqConfig.forEach((section) => {
+			section.latex.forEach((group) => {
+				group.forEach((item) => {
+					let col = $(`<button class="btn btn-default mq-button" data-formula="${item.replace(/\{[a-z]\}|\_[a-z]|\^[a-z]|\{|\}/gi, "")}"><span>${item}</span></button>`).appendTo(row);
+					col.click(function() {
+						answerMathField.cmd($(this).attr("data-formula"));
+						answerMathField.focus();
+					});
+					MQ.StaticMath(col.children()[0]);
+				});
+			});
+		});
+	}
 	static load() {
-		$("#document").html($("#document").html().replace(/$[\s\S]*?$/, 'formula!'));
+		answerMathField = MQ.MathField($("#mq-edit-field")[0], {
+			handlers: {
+				edit: function() {
+					enteredMath = answerMathField.latex();
+					$(".mq-active").attr("data-formula", enteredMath);
+					$(".mq-active").html(enteredMath);
+					MQ.StaticMath($(".mq-active")[0]);
+				}
+			}
+		});
+
+		while (findStringBetween($("#document").html(), ":fs:", ":fe:")) {
+			$("#document").html($("#document").html().replace(findStringBetween($("#document").html(), ":fs:", ":fe:")[0],
+				`<span class="mq">
+					${findStringBetween($("#document").html(), ":fs:", ":fe:")[0].replace(/:fs:|:fe:/g, "")}
+				</span><span>&nbsp;</span>`
+			));
+		}
+
+		initTinyMCE();
+
+		$(".mq").each(function() {
+			$(this).attr("data-formula", $(this).text());
+			MQ.StaticMath($(this)[0]);
+		});
+
+		loadListeners();
 	}
 	static unload() {
-
+		$(".mq").each(function() {
+			$(this)[0].outerHTML = `:fs:${$(this).attr("data-formula")}:fe:`;
+		});
+	}
+	static insert() {
+		tinymce.activeEditor.execCommand('mceInsertRawHTML', false,
+			`<span class="mq" id="mq-new" data-formula=""></span><span>&nbsp;</span>`);
+		window.setTimeout(function() {
+			loadListeners();
+			$("#mq-new").click();
+			$("#mq-new").attr("id", "");
+		}, 1);
 	}
 };
+
+function loadListeners() {
+	$("#document").on("click", function() {
+		$(".mq").removeClass("mq-active");
+		$("#mq-editor").attr("class", "");
+		answerMathField.latex("");
+	});
+
+	$(".mq").on("click", function(e) {
+		e.stopPropagation();
+		$(".mq").removeClass("mq-active");
+		$(this).addClass("mq-active");
+		$("#mq-editor").attr("class", "mq-field-active");
+		answerMathField.latex($(this).attr("data-formula"));
+		answerMathField.focus();
+	});
+}
+
+function findStringBetween(str, first, last) {
+	var r = new RegExp(first + '(.*?)' + last, 'gm');
+	return str.match(r);
+}
 
 export {
 	MQEdit
